@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:fieldinfosensorservice="services.fieldinfosensorservice.*"
+			   xmlns:fieldtoolstringsensorservice="services.fieldtoolstringsensorservice.*"
+			   xmlns:fieldinfoassetsensorservice="services.fieldinfoassetsensorservice.*"
+			   width="800" height="600" backgroundColor="#23AAE2" borderVisible="false"
+			   close="closeHandler(event)" creationComplete="creationCompleteHandler(event)"
+			   fontSize="11" implements="icd.mgmtview.api.IManagementView" title="View Sensor Used">
+	<fx:Script>
+		<![CDATA[
+			import flash.events.Event;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.Allinfo_service;
+			
+			[Bindable] public static var viewsensorVO:Allinfo_service = new Allinfo_service;
+			public function onApplicationResize(event:Event):void{}
+			protected function closeHandler(event:CloseEvent):void{
+				PopUpManager.removePopUp(this);
+			}
+			
+			public function prepareview(mode:int, titleName:String, objVO:Object=null):void{
+				viewsensorVO = objVO as Allinfo_service;
+			}
+			
+			protected function creationCompleteHandler(event:FlexEvent):void{
+				getAllfield_infoasset_sensorByassetIDResult.token = fieldinfoassetsensorService.getAllfield_infoasset_sensorByassetID(viewsensorVO.serviceID);
+			}
+			
+			[Bindable] private var arrSensor:ArrayCollection = new ArrayCollection(); 
+			protected function getAllfield_infoasset_sensorByassetIDResult_resultHandler(event:ResultEvent):void{
+				arrSensor = event.result as ArrayCollection;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		
+		<fieldinfoassetsensorservice:FieldinfoassetsensorService id="fieldinfoassetsensorService"
+																 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+																 showBusyCursor="true"/>
+		<s:CallResponder id="getAllfield_infoasset_sensorByassetIDResult" result="getAllfield_infoasset_sensorByassetIDResult_resultHandler(event)"/>
+	
+	</fx:Declarations>
+	<s:BorderContainer left="5" right="5" top="5" bottom="5" borderVisible="false" cornerRadius="5">
+		<mx:DataGrid id="dgReferences" left="5" right="5" top="10" bottom="5" borderVisible="false"
+					 chromeColor="#23AAE2" dataProvider="{arrSensor}" fontFamily="Arial" fontSize="10"
+					 fontWeight="normal" variableRowHeight="true"
+					 verticalGridLineColor="0xFFFFFF">
+			<mx:columns>
+				<mx:DataGridColumn width="35" dataField="" headerText="" textAlign="center"
+								   headerStyleName="centerBold"
+								   itemRenderer="com.icd.fieldlogger.admin.tabSensor.sensorColorPicker"/>
+				<mx:DataGridColumn dataField="sensor_name" headerText="Sensor Name" textAlign="center"
+								   headerStyleName="centerBold"/>
+				<mx:DataGridColumn width="60" dataField="sensor_unit" headerText="Unit" textAlign="center"
+								   headerStyleName="centerBold" />
+				<mx:DataGridColumn width="60" dataField="sensor_gain_a" headerText="a" textAlign="center"
+								   headerStyleName="centerBold" />
+				<mx:DataGridColumn width="60" dataField="sensor_offset_b" headerText="b" textAlign="center"
+								   headerStyleName="centerBold" />
+				<mx:DataGridColumn width="60" dataField="sensor_min" headerText="Min" textAlign="center"
+								   headerStyleName="centerBold" />
+				<mx:DataGridColumn width="60" dataField="sensor_max" headerText="Max" textAlign="center"
+								   headerStyleName="centerBold" />
+				
+				
+			</mx:columns>
+		</mx:DataGrid>
+		<!--<s:HGroup left="5" right="5" top="10" gap="15" verticalAlign="middle">
+			<s:Label height="20" fontSize="10" fontWeight="normal" text="Tool Name : " textAlign="left"
+					 verticalAlign="middle"/>
+			<s:Label height="20" color="#000000" fontSize="10" fontStyle="italic" fontWeight="bold"
+					 text="{viewsensorVO.tool_name}" verticalAlign="middle"/>
+			<mx:VRule height="18"/>
+			<s:Label height="20" fontSize="10" fontWeight="normal" text="S/N :" verticalAlign="middle"/>
+			<s:Label height="20" color="#000000" fontSize="10" fontStyle="italic" fontWeight="bold"
+					 text="{viewsensorVO.toolString_serialNo}" verticalAlign="middle"/>
+			<mx:LinkButton id="lbtnNote" visible="{viewsensorVO.toolString_note !== ''}" right="10"
+						   top="5" width="20" height="20" color="#000000" focusColor="#A2CBEA"
+						   fontSize="11" fontWeight="bold"
+						   icon="@Embed(source='../images/script_text.png')" paddingLeft="0"
+						   paddingRight="0" toolTip="{viewsensorVO.toolString_note}"/>
+		</s:HGroup>-->
+		<!--</s:Panel>-->
+	</s:BorderContainer>
+	
+</s:TitleWindow>

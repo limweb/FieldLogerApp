@@ -1,0 +1,47 @@
+
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   xmlns:catalogstampinfoservice="services.catalogstampinfoservice.*"
+		   width="100%" borderVisible="false" chromeColor="#F08080" fontFamily="Arial" fontSize="11" >
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			//import valueObjects.Allstamp;
+			
+			/* [Bindable]
+			public var simpleDP:Array = ['0x000000', '0xFF0000', '0xFF8800',
+			'0xFFFF00', '0x88FF00', '0x00FF00', '0x00FF88', '0x00FFFF',
+			'0x0088FF', '0x0000FF', '0x8800FF', '0xFF00FF', '0xFFFFFF']; */
+			
+			protected function ckxActive_clickHandler(event:MouseEvent):void{
+				/*if(ckxActive.selected){
+				data.stamp_active = '1';
+				}else{
+				data.stamp_active = '0';
+				}
+				var UpdateStamp:Allstamp= new Allstamp();
+				UpdateStamp.stampNo		   = data.stampNo;
+				UpdateStamp.stamp_active   = data.stamp_active;
+				updateCatalog_stampinfoeditorColumnResult.token = catalogstampinfoService.updateCatalog_stampinfoeditorColumn(UpdateStamp, "stamp_active");*/
+			} 
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		
+		<!--<catalogstampinfoservice:CatalogstampinfoService id="catalogstampinfoService"
+		fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+		showBusyCursor="true"/>
+		<s:CallResponder id="updateCatalog_stampinfoeditorColumnResult"/>-->
+		
+		
+	</fx:Declarations>
+	<mx:TextInput id="txtSensorColor" width="20" height="20" borderVisible="false"
+				  chromeColor="#23AAE2" contentBackgroundColor="{data.color}" editable="false"
+				  horizontalCenter="0" verticalCenter="0"/> 
+</mx:Canvas>

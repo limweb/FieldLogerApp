@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:tapClient="com.icd.fieldlogger.myHome.control.tapClient.*"
+		  xmlns:tapUser="com.icd.fieldlogger.myHome.control.tapUser.*"
+		  xmlns:tabInfo="com.icd.fieldlogger.admin.tabInfo.*"
+		  xmlns:tabTools="com.icd.fieldlogger.admin.tabTools.*"
+		  xmlns:fieldinfotoollistservice="services.fieldinfotoollistservice.*"
+		  width="100%" height="100%" creationComplete="creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.icd.fieldlogger.admin.tabInfo.projecInfoFormEdit;
+			import com.icd.fieldlogger.admin.tabSensor.sensorViewAll;
+			
+			import icd.mgmtview.api.constant.ManagementViewConst;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.Allinfo_toollist;
+			
+			
+			protected function creationCompleteHandler(event:FlexEvent):void{
+				getAllField_infotoollistResult.token = fieldinfotoollistService.getAllField_infotoollist();
+			}
+			
+			[Bindable] private var arrInfoToollist:ArrayCollection = new ArrayCollection();
+			protected function getAllField_infotoollistResult_resultHandler(event:ResultEvent):void{
+				arrInfoToollist = event.result as ArrayCollection;
+			}
+			
+			protected function lbtnAddTool_clickHandler(event:MouseEvent):void{
+				var ttwdEdit:toolsListFormEdit = new toolsListFormEdit();
+				ttwdEdit.prepareview(ManagementViewConst.MODE_ADD, "Create New Tool");
+				PopUpManager.addPopUp(ttwdEdit,this,true);
+				PopUpManager.centerPopUp(ttwdEdit);
+				ttwdEdit.isPopUp = true; 
+				ttwdEdit.addEventListener(CloseEvent.CLOSE, alphaPopupCloseHandler);
+			}
+			public function alertEdit():void{
+				var ttwdEdit:toolsListFormEdit = new toolsListFormEdit();
+				ttwdEdit.prepareview(ManagementViewConst.MODE_EDIT, "Update Tool", dgToollist.selectedItem as Allinfo_toollist);
+				PopUpManager.addPopUp(ttwdEdit,this,true);
+				PopUpManager.centerPopUp(ttwdEdit);
+				ttwdEdit.isPopUp = true; 
+				ttwdEdit.addEventListener(CloseEvent.CLOSE, alphaPopupCloseHandler);
+			}
+			[Bindable] private var clickDel:int;
+			public function alertDelete():void{
+				clickDel = dgToollist.selectedItem.toolNo;
+				Alert.show("Are you sure?", "Confirm Delete", Alert.YES | Alert.NO, this, clickDelete, null, Alert.YES);
+			}
+			
+			protected function clickDelete(eventObj:CloseEvent):void {
+				if(eventObj.detail==Alert.YES) {
+					deleteField_infotoollistResult.token = fieldinfotoollistService.deleteField_infotoollist(clickDel);
+				}
+			}
+			
+			
+			public function alertSensor():void{
+				var ttwdEdit:sensorViewAll = new sensorViewAll();
+				ttwdEdit.prepareview(ManagementViewConst.MODE_EDIT,null,dgToollist.selectedItem as Allinfo_toollist);
+				PopUpManager.addPopUp(ttwdEdit,this,true);
+				PopUpManager.centerPopUp(ttwdEdit);
+				ttwdEdit.isPopUp = true; 
+			}
+			
+			protected function deleteField_infotoollistResult_resultHandler(event:ResultEvent):void{
+				getAllField_infotoollistResult.token = fieldinfotoollistService.getAllField_infotoollist();
+			}
+			private function alphaPopupCloseHandler(e:CloseEvent):void{
+				getAllField_infotoollistResult.token = fieldinfotoollistService.getAllField_infotoollist();
+			}
+			protected function lbtnRefresh_clickHandler(event:MouseEvent):void{
+				getAllField_infotoollistResult.token = fieldinfotoollistService.getAllField_infotoollist();
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		
+		<fieldinfotoollistservice:FieldinfotoollistService id="fieldinfotoollistService"
+														   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+														   showBusyCursor="true"/>
+		<s:CallResponder id="getAllField_infotoollistResult" result="getAllField_infotoollistResult_resultHandler(event)"/>
+		<s:CallResponder id="deleteField_infotoollistResult" result="deleteField_infotoollistResult_resultHandler(event)"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:BorderContainer left="5" right="5" top="5" height="26" backgroundColor="#90D6F3"
+					   borderColor="#23AAE2" borderVisible="false" chromeColor="#23AAE2"
+					   contentBackgroundColor="#23AAE2">
+		<mx:LinkBar id="lbtnContract" left="7" height="22" borderColor="#C8EFFF"
+					chromeColor="#90D6F3" color="#000000"
+					dataProvider="{viewStackControl}" fontSize="10"
+					fontWeight="bold" paddingBottom="0" paddingLeft="0" paddingRight="0"
+					paddingTop="0" selectedIndex="0" verticalCenter="0"/>
+	</s:BorderContainer>
+	<s:BorderContainer id="grpViewPDQ" left="2" right="2" top="32" bottom="2"
+					   borderColor="#23AAE2" borderVisible="false" borderWeight="2"
+					   chromeColor="#23AAE2" cornerRadius="5">
+		<mx:ViewStack id="viewStackControl" left="0" right="0" top="0" bottom="0">
+			<s:NavigatorContent width="100%" height="100%" label="Tool List" icon="@Embed(source='../images/bullet_yellow.png')" 
+								toolTip="Project Info">
+				<s:BorderContainer left="2" right="2" top="2" bottom="2" borderVisible="false">
+					<s:Scroller left="0" right="0" top="0" bottom="0">
+						<s:Group width="100%" height="100%" chromeColor="#FF9999" fontFamily="Arial" fontSize="10">
+							<s:HGroup left="10" top="4" gap="10">
+								<mx:LinkButton id="lbtnAddTool" left="10" top="4" height="25"
+											   label="Add New Tool"
+											   click="lbtnAddTool_clickHandler(event)"
+											   color="#000000" fontStyle="italic" fontWeight="bold"
+											   icon="@Embed(source='../images/add1.png')"
+											   paddingLeft="0" paddingRight="0" paddingTop="0"
+											   toolTip="Click to add new project"/>
+								<mx:LinkButton id="lbtnRefresh" width="30" height="25"
+											   click="lbtnRefresh_clickHandler(event)" color="#007C7B"
+											   focusColor="#70B2EE" fontWeight="bold"
+											   icon="@Embed(source='../images/refresh.png')"
+											   paddingLeft="5" paddingRight="5" toolTip="Refresh"/>
+							</s:HGroup>
+							
+							<mx:DataGrid id="dgToollist" left="5" right="5" top="35" bottom="5" borderVisible="false"
+										 chromeColor="#23AAE2" dataProvider="{arrInfoToollist}" fontFamily="Arial" fontSize="10"
+										 fontWeight="normal" variableRowHeight="true"
+										 verticalGridLineColor="0xFFFFFF">
+								<mx:columns>
+									<mx:DataGridColumn width="50" dataField="" headerText="" textAlign="center"
+													   wordWrap="true" headerStyleName="centerBold">
+										<mx:itemRenderer>
+											<fx:Component>
+												<mx:HBox horizontalAlign="center">
+													<mx:LinkButton icon="@Embed(source='../images/delete.png')" width="16" height="16"
+																   toolTip="Click to delete" click="outerDocument.alertDelete()"/>
+													<mx:LinkButton id="btnGridEdit" icon="@Embed(source='../images/modify12.png')" width="16"  height="16"
+																   toolTip="Click to edit" click="outerDocument.alertEdit()"/>
+												</mx:HBox>
+											</fx:Component>
+										</mx:itemRenderer>
+									</mx:DataGridColumn>
+									<mx:DataGridColumn width="60" dataField="" headerText="Active" textAlign="center"
+													   wordWrap="true" headerStyleName="centerBold">
+										<mx:itemRenderer>
+											<fx:Component>
+												<mx:HBox horizontalAlign="center">
+													<mx:LinkButton icon="@Embed(source='../images/tick.png')" width="16"  height="16" mouseEnabled="false"
+																   visible="{data.tool_active === '1'}"/>
+												</mx:HBox>
+											</fx:Component>
+										</mx:itemRenderer>
+									</mx:DataGridColumn>
+									<mx:DataGridColumn width="60" dataField="" headerText="Sensor" editable="false" textAlign="center"
+													   headerStyleName="centerBold" wordWrap="true">
+										<mx:itemRenderer>
+											<fx:Component>
+												<mx:HBox horizontalAlign="center">
+													
+													<mx:LinkButton icon="@Embed(source='../images/system_monitor.png')" width="13"
+																   toolTip="Click to view Sensor" click="outerDocument.alertSensor()"
+																   visible="{data.tool_sensor === '1'}"/>
+												</mx:HBox>
+											</fx:Component>
+										</mx:itemRenderer>
+									</mx:DataGridColumn>
+									<mx:DataGridColumn width="300" dataField="tool_name" headerText="Tool Name" textAlign="center"
+													   wordWrap="true" headerStyleName="centerBold"/>
+									<mx:DataGridColumn width="300" dataField="tool_1" headerText="URL" textAlign="center"
+													   wordWrap="true" headerStyleName="centerBold"/>
+									<mx:DataGridColumn dataField="tool_note" headerText="Note" textAlign="center"
+													   wordWrap="true" headerStyleName="centerBold"/>
+								</mx:columns>
+							</mx:DataGrid>
+						</s:Group>
+					</s:Scroller>
+				</s:BorderContainer>
+			</s:NavigatorContent>
+			
+			<s:NavigatorContent width="100%" height="100%" label="Asset List" icon="@Embed(source='../images/bullet_yellow.png')"
+								toolTip="Client Info">
+				<tabTools:assetListModule>
+				</tabTools:assetListModule>
+			</s:NavigatorContent>
+			
+			
+		</mx:ViewStack>
+	</s:BorderContainer>
+	
+	
+</s:Module>

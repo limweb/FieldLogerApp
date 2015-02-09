@@ -1,0 +1,45 @@
+
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   xmlns:catalogstampinfoservice="services.catalogstampinfoservice.*"
+		   xmlns:fieldpersonnalservice="services.fieldpersonnalservice.*"
+		   width="100%" chromeColor="#F08080" fontFamily="Arial" fontSize="11" 
+		   xmlns:fieldreportpersonnalservice="services.fieldreportpersonnalservice.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			import valueObjects.Allpersonnal;
+			import valueObjects.Allreport_personnal;
+	
+			protected function ckxActive_clickHandler(event:MouseEvent):void{
+				if(ckxActive.selected){
+					data.person_leader = '1';
+				}else{
+					data.person_leader = '0';
+				}
+				var UpdateLeader:Allreport_personnal = new Allreport_personnal();
+				UpdateLeader.personNo		   		 = data.personNo;
+				UpdateLeader.person_leader   		 = data.person_leader;
+				updateField_personnalEditorColumnResult.token = fieldpersonnalService.updateField_personnalEditorColumn(UpdateLeader, "person_leader");
+			} 
+
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		
+		<fieldreportpersonnalservice:FieldreportpersonnalService id="fieldpersonnalService"
+													 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+													 showBusyCursor="true"/>
+		<s:CallResponder id="updateField_personnalEditorColumnResult"/>
+	
+	</fx:Declarations>
+		<mx:CheckBox id="ckxActive" top="0" chromeColor="#23AAE2" click="ckxActive_clickHandler(event)"
+					 cornerRadius="0" horizontalCenter="0" paddingBottom="0" paddingTop="0"
+					 selected="{data.person_leader === '1'}" textAlign="center"/>
+
+</mx:Canvas>

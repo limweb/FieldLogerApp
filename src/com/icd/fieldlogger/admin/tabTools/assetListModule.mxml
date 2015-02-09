@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:fieldinfoassetservice="services.fieldinfoassetservice.*"
+		  width="100%" height="100%" creationComplete="creationCompleteHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import icd.mgmtview.api.constant.ManagementViewConst;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.Allinfo_assetAdvanced;
+			
+			protected function creationCompleteHandler(event:FlexEvent):void{
+				getAllField_infoassetAdvancedResult.token = fieldinfoassetService.getAllField_infoassetAdvanced();
+			}
+			
+			[Bindable] private var arrAsset:ArrayCollection = new ArrayCollection();
+			protected function getAllField_infoassetAdvancedResult_resultHandler(event:ResultEvent):void{
+				arrAsset = event.result as ArrayCollection;
+			}
+			
+			protected function lbtnAddUser_clickHandler(event:MouseEvent):void{
+				var ttwdEdit:assetListFormEdit = new assetListFormEdit();
+				ttwdEdit.prepareview(ManagementViewConst.MODE_ADD, "Create New Asset");
+				PopUpManager.addPopUp(ttwdEdit,this,true);
+				//ttwdEdit.x = 10;
+				//ttwdEdit.y = 10;
+				//PopUpManager.centerPopUp(ttwdEdit);
+				ttwdEdit.isPopUp = true; 
+				ttwdEdit.addEventListener(CloseEvent.CLOSE, alphaPopupCloseHandler);
+			}
+			
+			public function alertEdit():void{
+				var ttwdEdit:assetListFormEdit = new assetListFormEdit();
+				ttwdEdit.prepareview(ManagementViewConst.MODE_EDIT, "Update Asset", dgAsset.selectedItem as Allinfo_assetAdvanced);
+				PopUpManager.addPopUp(ttwdEdit,this,true);
+				//ttwdEdit.x = 10;
+				//ttwdEdit.y = 10;
+				//PopUpManager.centerPopUp(ttwdEdit);
+				ttwdEdit.isPopUp = true; 
+				ttwdEdit.addEventListener(CloseEvent.CLOSE, alphaPopupCloseHandler);
+			}
+			[Bindable] private var clickDel:int;
+			public function alertDelete():void{
+				clickDel = dgAsset.selectedItem.assetNo;
+				Alert.show("Are you sure?", "Confirm Delete", Alert.YES | Alert.NO, this, clickDelete, null, Alert.YES);
+			}
+			
+			protected function clickDelete(eventObj:CloseEvent):void {
+				if(eventObj.detail==Alert.YES) {
+					deleteField_infoassetResult.token = fieldinfoassetService.deleteField_infoasset(clickDel);
+				}
+			}
+			
+			protected function deleteField_infosensorResult_resultHandler(event:ResultEvent):void{
+				getAllField_infoassetAdvancedResult.token = fieldinfoassetService.getAllField_infoassetAdvanced();
+			}
+			private function alphaPopupCloseHandler(e:CloseEvent):void{
+				getAllField_infoassetAdvancedResult.token = fieldinfoassetService.getAllField_infoassetAdvanced();
+			}
+			protected function lbtnRefresh_clickHandler(event:MouseEvent):void{
+				getAllField_infoassetAdvancedResult.token = fieldinfoassetService.getAllField_infoassetAdvanced();
+			}
+			
+			public function alertRef():void{
+				var ttwdEdit:assetReferences = new assetReferences();
+				ttwdEdit.assetID = dgAsset.selectedItem.assetID
+				PopUpManager.addPopUp(ttwdEdit,this,true);
+				PopUpManager.centerPopUp(ttwdEdit);
+				ttwdEdit.isPopUp = true;
+			}
+		
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		
+		<fieldinfoassetservice:FieldinfoassetService id="fieldinfoassetService"
+													 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+													 showBusyCursor="true"/>
+		<s:CallResponder id="getAllField_infoassetAdvancedResult" result="getAllField_infoassetAdvancedResult_resultHandler(event)"/>
+		<s:CallResponder id="deleteField_infoassetResult" result="deleteField_infosensorResult_resultHandler(event)"/>
+		
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:BorderContainer left="2" right="2" top="2" bottom="2" borderVisible="false">
+		<s:Scroller left="0" right="0" top="0" bottom="0">
+			<s:Group width="100%" height="100%" chromeColor="#FF9999" fontFamily="Arial" fontSize="10">
+				<mx:DataGrid id="dgAsset" left="5" right="5" top="35" bottom="5" borderVisible="false"
+							 chromeColor="#23AAE2" dataProvider="{arrAsset}" fontFamily="Arial" fontSize="10"
+							 fontWeight="normal" variableRowHeight="true"
+							 verticalGridLineColor="0xFFFFFF">
+					<mx:columns>
+						<mx:DataGridColumn width="50" dataField="" headerText="" textAlign="center"
+										   wordWrap="true" headerStyleName="centerBold">
+							<mx:itemRenderer>
+								<fx:Component>
+									<mx:HBox horizontalAlign="center" verticalAlign="top">
+										<mx:LinkButton id="btnGridDelete" icon="@Embed(source='../images/delete.png')" width="16" height="16"
+													   toolTip="Click to delete" click="outerDocument.alertDelete()"/>
+										<mx:LinkButton id="btnGridEdit" icon="@Embed(source='../images/modify12.png')" width="16" height="16"
+													   toolTip="Click to edit" click="outerDocument.alertEdit()"/>
+									</mx:HBox>
+								</fx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn width="60" dataField="" headerText="Active" textAlign="center"
+										   wordWrap="true" headerStyleName="centerBold">
+							<mx:itemRenderer>
+								<fx:Component>
+									<mx:HBox horizontalAlign="center">
+										<mx:LinkButton icon="@Embed(source='../images/tick.png')" width="16" height="16" mouseEnabled="false"
+													   visible="{data.asset_active === '1'}"/>
+									</mx:HBox>
+								</fx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn width="50" dataField="" headerText="Ref" textAlign="center"
+										   wordWrap="true" headerStyleName="centerBold">
+							<mx:itemRenderer>
+								<fx:Component>
+									<mx:HBox horizontalAlign="center" verticalAlign="top">
+										<mx:Canvas>
+											<mx:LinkButton icon="@Embed(source='../images/attach.png')" width="16" height="16"
+														   toolTip="Click to View Reference" visible="{data.asset_ref === '1'}" 
+														   click="outerDocument.alertRef();"/>
+										</mx:Canvas>
+									</mx:HBox>
+								</fx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn width="300" dataField="tool_name" headerText="Tool Name" textAlign="center"
+										   headerStyleName="centerBold"/>
+						<mx:DataGridColumn width="100" dataField="asset_serialNo" headerText="S/N" textAlign="center"
+										   headerStyleName="centerBold"/>
+						<mx:DataGridColumn width="150" dataField="asset_status" headerText="Status" textAlign="center"
+										   headerStyleName="centerBold"/>
+						<mx:DataGridColumn  width="200" dataField="asset_located" headerText="Located" textAlign="center"
+										   headerStyleName="centerBold"/>
+						<mx:DataGridColumn dataField="asset_note" headerText="Note" textAlign="left"
+										   wordWrap="true" headerStyleName="centerBold"/>
+					</mx:columns>
+				</mx:DataGrid>
+				
+				<s:HGroup left="10" top="4" height="25" color="#000000" gap="10">
+					<mx:LinkButton id="lbtnAddUser" height="25" label="Add New Asset"
+								   click="lbtnAddUser_clickHandler(event)" color="#000000"
+								   fontSize="10" fontStyle="italic" fontWeight="bold"
+								   icon="@Embed(source='../images/add1.png')" paddingLeft="5"
+								   paddingRight="5" toolTip="start synchronization"/>
+					<mx:LinkButton id="lbtnRefresh" width="30" height="25"
+								   click="lbtnRefresh_clickHandler(event)" color="#007C7B"
+								   focusColor="#70B2EE" fontWeight="bold"
+								   icon="@Embed(source='../images/refresh.png')" paddingLeft="5"
+								   paddingRight="5" toolTip="Refresh"/>
+				</s:HGroup>
+				
+			</s:Group>
+		</s:Scroller>
+	</s:BorderContainer>
+</s:Module>

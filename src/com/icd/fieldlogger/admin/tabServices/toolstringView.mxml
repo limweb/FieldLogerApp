@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="600" height="450" backgroundColor="#23AAE2" borderVisible="false"
+			   fontSize="11" title="View Tool String Used" close="closeHandler(event)"
+			   creationComplete="creationCompleteHandler(event)" 
+			   xmlns:fieldinfosensorservice="services.fieldinfosensorservice.*" 
+			   xmlns:fieldtoolstringsensorservice="services.fieldtoolstringsensorservice.*"
+			   implements="icd.mgmtview.api.IManagementView" xmlns:fieldtoolstringservice="services.fieldtoolstringservice.*">
+	<fx:Script>
+		<![CDATA[
+			import com.icd.fieldlogger.admin.tabSensor.sensorViewUsed;
+			
+			import flash.events.Event;
+			
+			import icd.mgmtview.api.constant.ManagementViewConst;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+		
+			import valueObjects.Allinfo_service;
+			import valueObjects.AlltoolstringAdvanced;
+			
+			[Bindable] private var serviceVO:Allinfo_service = new Allinfo_service;
+			public function onApplicationResize(event:Event):void{}
+			protected function closeHandler(event:CloseEvent):void{
+				PopUpManager.removePopUp(this);
+			}
+			
+			public function prepareview(mode:int, titleName:String, objVO:Object=null):void{
+				serviceVO = objVO as Allinfo_service;
+			}
+			
+			protected function creationCompleteHandler(event:FlexEvent):void{
+				getAllField_toolstringAdvancedByServiceIDResult.token = fieldtoolstringService.getAllField_toolstringAdvancedByServiceID(serviceVO.serviceID);
+			}
+			
+			[Bindable] private var arrToolString:ArrayCollection = new ArrayCollection();
+			protected function getAllField_toolstringAdvancedByServiceIDResult_resultHandler(event:ResultEvent):void{
+				arrToolString = event.result as ArrayCollection;
+			}
+			
+			public function alertSensor():void{
+				var ttwdSensor:sensorViewUsed = new sensorViewUsed();
+				ttwdSensor.prepareview(ManagementViewConst.MODE_EDIT,null,dgToolString.selectedItem as AlltoolstringAdvanced);
+				PopUpManager.addPopUp(ttwdSensor,this,true);
+				PopUpManager.centerPopUp(ttwdSensor);
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<fieldtoolstringservice:FieldtoolstringService id="fieldtoolstringService"
+													   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+													   showBusyCursor="true"/>
+		<s:CallResponder id="getAllField_toolstringAdvancedByServiceIDResult" result="getAllField_toolstringAdvancedByServiceIDResult_resultHandler(event)"/>
+	</fx:Declarations>
+	
+	<s:BorderContainer left="5" right="5" top="5" bottom="5" borderVisible="false" cornerRadius="5">
+		<mx:DataGrid id="dgToolString" left="5" right="5" top="40" bottom="5" borderVisible="false"
+					 chromeColor="#23AAE2" dataProvider="{arrToolString}" fontFamily="Arial" fontSize="10"
+					 fontWeight="normal" variableRowHeight="true"
+					 verticalGridLineColor="0xFFFFFF">
+			<mx:columns>
+				<mx:DataGridColumn width="200" dataField="tool_name" headerText="Tool Name" textAlign="center"
+								   wordWrap="true" headerStyleName="centerBold"/>
+				<mx:DataGridColumn width="100" dataField="toolString_serialNo" headerText="S/N" editable="false" textAlign="center"
+								   headerStyleName="centerBold" wordWrap="true"/>
+				<mx:DataGridColumn width="50" dataField="sensor" headerText="Sensor" editable="false" textAlign="center"
+								   headerStyleName="centerBold" wordWrap="true">
+					<mx:itemRenderer>
+						<fx:Component>
+							<mx:HBox horizontalAlign="center" verticalAlign="top">
+								<mx:Canvas>
+									<mx:LinkButton icon="@Embed(source='../images/system_monitor.png')" width="16" height="16"
+												   toolTip="Click to view" click="outerDocument.alertSensor();"/>
+								</mx:Canvas>
+							</mx:HBox>
+						</fx:Component>
+					</mx:itemRenderer>
+				</mx:DataGridColumn>
+				<mx:DataGridColumn dataField="toolString_note" headerText="Note" textAlign="center"
+								   wordWrap="true" headerStyleName="centerBold"/>
+			</mx:columns>
+		</mx:DataGrid>
+		<s:HGroup left="5" right="5" top="10" gap="15" verticalAlign="middle">
+			<s:Label height="20" fontSize="10" fontWeight="normal" text="Service Name : " textAlign="left"
+					 verticalAlign="middle"/>
+			<s:Label height="20" color="#000000" fontSize="10" fontStyle="italic" fontWeight="bold"
+					 text="{serviceVO.service_name}" verticalAlign="middle"/>
+			<mx:LinkButton id="lbtnNote" visible="{serviceVO.service_note !== ''}" right="10"
+						   top="5" width="20" height="20" color="#000000" focusColor="#A2CBEA"
+						   fontSize="11" fontWeight="bold"
+						   icon="@Embed(source='../images/script_text.png')" paddingLeft="0"
+						   paddingRight="0" toolTip="{serviceVO.service_note}"/>
+		</s:HGroup>
+		<!--</s:Panel>-->
+	</s:BorderContainer>
+	
+</s:TitleWindow>

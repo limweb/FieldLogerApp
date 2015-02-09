@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100"
+		 creationComplete="init(event)"
+		 doubleClickEnabled="true"
+		 doubleClick="group1_doubleClickHandler(event)"
+		 >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectUtil;
+			
+			[Bindable]
+			public var myData:ArrayCollection = new ArrayCollection();
+			
+			[Bindable]
+			public var yf:String = '';
+			
+			[Bindable]
+			public var showx:Boolean = false;
+			
+			[Bindable]
+			public var showy:Boolean = false;
+			
+			[Bindable]
+			public var maxVAxis:Number = 100;
+			
+			[Bindable] public var showdata:String = 'data';
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function group1_doubleClickHandler(event:MouseEvent):void
+			{
+				Alert.show(ObjectUtil.toString(myData));
+			}
+			
+		]]>
+	</fx:Script>
+	<mx:CartesianChart id="myChart" width="100%" height="100%" 
+					   dataProvider="{myData}"
+					   showDataTips="true"
+					   >
+		<mx:horizontalAxis>
+			<mx:CategoryAxis id="a1" categoryField="id"/>
+		</mx:horizontalAxis>
+		
+		<mx:horizontalAxisRenderers>
+			<mx:AxisRenderer 
+				axis="{a1}"                 
+				showLabels="{showx}"
+				>
+				<mx:axisStroke>
+					<mx:Stroke color="#000000" weight=".1" alpha=".75" />
+				</mx:axisStroke>
+				<mx:tickStroke>
+					<mx:Stroke color="#CCCCCC" weight="0.1" />
+				</mx:tickStroke>
+				<mx:minorTickStroke>
+					<mx:Stroke color="#CCCCCC" weight="0.1" />
+				</mx:minorTickStroke>
+			</mx:AxisRenderer>
+		</mx:horizontalAxisRenderers>
+		
+		<mx:verticalAxis>
+			<mx:LinearAxis id="a2" maximum="{maxVAxis}"/>
+		</mx:verticalAxis>
+		
+		<mx:verticalAxisRenderers>
+			<mx:AxisRenderer axis="{a2}" showLabels="{showy}">
+				<mx:axisStroke>
+					<mx:Stroke color="#000000" weight=".1" alpha=".75" />
+				</mx:axisStroke>
+				<mx:tickStroke>
+					<mx:Stroke color="#CCCCCC" weight="0.1" />
+				</mx:tickStroke>
+				<mx:minorTickStroke>
+					<mx:Stroke color="#CCCCCC" weight="0.1" />
+				</mx:minorTickStroke>
+			</mx:AxisRenderer>
+		</mx:verticalAxisRenderers>
+		
+		<mx:series>
+			<!--			<mx:ColumnSeries displayName="{showdata}" yField="{yf}" xField="id"  visible="false" includeInLayout="false" />
+			<mx:AreaSeries displayName="{showdata}" yField="{yf}" xField="id" visible="true"  includeInLayout="true" />-->
+			<mx:LineSeries displayName="{showdata}" yField="{yf}" xField="id" visible="false" includeInLayout="false"/>
+		</mx:series>
+	</mx:CartesianChart>
+</s:Group>

@@ -1,0 +1,54 @@
+
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   xmlns:catalogstampinfoservice="services.catalogstampinfoservice.*"
+		   xmlns:fieldtoolstringsensorservice="services.fieldtoolstringsensorservice.*"
+		   width="100%" chromeColor="#F08080" fontFamily="Arial" fontSize="11" 
+		   creationComplete="canvas_creationCompleteHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.icd.fieldlogger.admin.tabServices.servicesAssetFormEdit;
+			import com.icd.fieldlogger.admin.tabServices.__toolstringFormEdit;
+			import com.icd.fieldlogger.admin.tabTools.toolsListFormEdit;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.Allinfo_sensor;
+			import valueObjects.Alltoolstring;
+			import valueObjects.Alltoolstring_sensor;
+			
+			[Bindable] private var sensorActive:Boolean;
+			protected function canvas_creationCompleteHandler(event:FlexEvent):void{
+				//getField_toolstring_sensorByToolstringIDResult.token = fieldtoolstringsensorService.getField_toolstring_sensorByToolstringID(sensorViewUsed.viewsensorVO.toolStringID)
+			}
+			[Bindable] private var arrToolstringSensor:ArrayCollection = new ArrayCollection();
+			protected function getField_toolstring_sensorByToolstringIDResult_resultHandler(event:ResultEvent):void{
+				arrToolstringSensor = event.result as ArrayCollection;
+				for each(var item:Alltoolstring_sensor in arrToolstringSensor){
+					if(item.sensorID === data.sensorID){
+						sensorActive = true;
+					}
+				}
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		
+		<fieldtoolstringsensorservice:FieldtoolstringsensorService id="fieldtoolstringsensorService"
+																   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+																   showBusyCursor="true"/>
+		<s:CallResponder id="createField_toolstring_sensorResult"/>
+		<s:CallResponder id="deleteField_toolstring_sensorByCheckboxResult"/>
+		<s:CallResponder id="getField_toolstring_sensorByToolstringIDResult" result="getField_toolstring_sensorByToolstringIDResult_resultHandler(event)"/>
+		
+	</fx:Declarations>
+	<mx:LinkButton visible="{sensorActive}" top="0" width="16" height="16" horizontalCenter="0"
+				   icon="@Embed(source='../images/tick.png')" mouseEnabled="false"/>
+</mx:Canvas>

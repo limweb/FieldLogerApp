@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication  xmlns:fx="http://ns.adobe.com/mxml/2009"
+						xmlns:s="library://ns.adobe.com/flex/spark"
+						xmlns:mx="library://ns.adobe.com/flex/mx"
+						creationComplete="application_creationCompleteHandler(event)"
+						fontSize="10" pageTitle="Field Logger Version 1.0"
+						minWidth="955" minHeight="600"
+						width="100%" height="100%">
+	<fx:Style source="index.css"/>
+	<fx:Script>
+		<![CDATA[
+			import com.icd.fieldlogger.login.LoginModule;
+			import com.icd.fieldlogger.main.mainModule;
+			
+			import mx.controls.Alert;
+			import mx.core.IVisualElement;
+			import mx.events.FlexEvent;
+			import mx.managers.SystemManager;
+			
+			import spark.modules.Module;
+			
+			protected function application_creationCompleteHandler(event:FlexEvent):void {
+				changePanel(new mainModule());
+				//changePanel(new LoginModule());
+			}
+			//
+			public function changePanel(module:Module):void {
+				sPanel.removeAllElements();
+				sPanel.addElement(module as IVisualElement);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:Panel id="sPanel" left="0" right="0" top="0" bottom="0" chromeColor="#23AAE2" color="#000000"
+			 fontFamily="Arial" fontSize="12" fontWeight="bold" title="Field Logger ">
+	</s:Panel>
+</s:WindowedApplication>

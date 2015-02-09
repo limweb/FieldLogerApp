@@ -1,0 +1,102 @@
+
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   xmlns:fieldtoolstringservice="services.fieldtoolstringservice.*"
+		   xmlns:fieldinfoassetsensorservice="services.fieldinfoassetsensorservice.*"
+		   width="100%" chromeColor="#F08080"
+		   dataChange="dataChangeHandler(event)" fontFamily="Arial" fontSize="11">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.icd.fieldlogger.admin.tabServices._servicesFormEdit;
+			import com.icd.fieldlogger.admin.tabServices._toolstringFormEdit;
+			import com.icd.fieldlogger.admin.tabServices.servicesAssetFormEdit;
+			import com.icd.fieldlogger.admin.tabTools.assetListFormEdit;
+			import com.icd.fieldlogger.admin.tabTools.toolsListFormEdit;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import org.osflash.signals.natives.INativeDispatcher;
+			
+			import valueObjects.Allinfo_asset_sensor;
+			import valueObjects.Allinfo_asset_sensorAdvanced;
+			import valueObjects.Alltoolstring;
+
+			[Bindable] private var sensorActive:Boolean;
+			protected function dataChangeHandler(event:FlexEvent):void{
+				getAllfield_infoasset_sensorByassetIDResult.token = fieldinfoassetsensorService.getAllfield_infoasset_sensorByassetID(assetListFormEdit.assetVO.assetID);
+			}
+		
+			[Bindable] private var arrToolstringSensor:ArrayCollection = new ArrayCollection();
+			protected function getAllfield_infoasset_sensorByassetIDResult_resultHandler(event:ResultEvent):void{
+				arrToolstringSensor = event.result as ArrayCollection;
+				for each(var item:Allinfo_asset_sensorAdvanced in arrToolstringSensor){
+					if(item.ts_sensorID === data.sensorID){
+						sensorActive = true;
+					}
+				}
+			}
+	
+			protected function chkActive_clickHandler(event:MouseEvent):void{
+				if(chkActive.selected){
+					var createSensor:Allinfo_asset_sensor	 	= new Allinfo_asset_sensor();
+					createSensor.ts_sensorID					= data.sensorID;
+					createSensor.ts_assetID	 					= assetListFormEdit.assetVO.assetID;
+					createfield_infoasset_sensorResult.token = fieldinfoassetsensorService.createfield_infoasset_sensor(createSensor);
+				}if(!chkActive.selected){
+					deletefield_infoasset_sensorByCheckboxResult.token = fieldinfoassetsensorService.deletefield_infoasset_sensorByCheckbox(assetListFormEdit.assetVO.assetID,  data.sensorID);
+				}
+			} 
+			protected function deletefield_infoasset_sensorByCheckboxResult_resultHandler(event:ResultEvent):void{
+				var updateColor:Allinfo_asset_sensor	= new Allinfo_asset_sensor();
+				updateColor.ts_assetID			 		= assetListFormEdit.assetVO.assetID;
+				updateColor.ts_sensorID					= data.sensorID;
+				updateColor.ts_sensorColor			 	= '0';
+				updatefield_infoasset_sensorEditorColumnResult.token = fieldinfoassetsensorService.updatefield_infoasset_sensorEditorColumn(updateColor, "ts_sensorColor");
+			}
+			
+			////***CountSensor***////
+			protected function infoasset_sensorResult_resultHandler(event:ResultEvent):void{
+				
+				//trace("Update");
+				//countByServiceToolstringIDResult.token = fieldtoolstringsensorService.countByServiceToolstringI(toolstringFormEdit.ToolstringVO.toolStringID);
+			}
+			[Bindable] private var countTool:int;
+			protected function countByServiceToolstringIDResult_resultHandler(event:ResultEvent):void{
+				countTool = event.result.countTool;
+				trace(countTool);
+				var updateCountSensor:Alltoolstring = new Alltoolstring();
+				updateCountSensor.toolStringID		= _toolstringFormEdit.ToolstringVO.toolStringID
+				updateCountSensor.toolString_sensor = countTool.toString();
+				updateField_toolstringEditorColumnResult.token = fieldtoolstringService.updateField_toolstringEditorColumn(updateCountSensor, "toolString_sensor");
+			}
+
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+
+		<fieldtoolstringservice:FieldtoolstringService id="fieldtoolstringService"
+													   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+													   showBusyCursor="true"/>
+		<s:CallResponder id="updateField_toolstringEditorColumnResult"/>
+		
+		<fieldinfoassetsensorservice:FieldinfoassetsensorService id="fieldinfoassetsensorService"
+																 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+																 showBusyCursor="true"/>
+		<s:CallResponder id="getAllfield_infoasset_sensorByassetIDResult" result="getAllfield_infoasset_sensorByassetIDResult_resultHandler(event)"/>
+		<s:CallResponder id="createfield_infoasset_sensorResult" result="infoasset_sensorResult_resultHandler(event)"/>
+		<s:CallResponder id="deletefield_infoasset_sensorByCheckboxResult" result="deletefield_infoasset_sensorByCheckboxResult_resultHandler(event)"/>
+		<s:CallResponder id="updatefield_infoasset_sensorEditorColumnResult"/>
+		
+	</fx:Declarations>
+		<mx:CheckBox id="chkActive" top="0" chromeColor="#23AAE2" click="chkActive_clickHandler(event)"
+					 cornerRadius="0" horizontalCenter="0" paddingBottom="0" paddingTop="0"
+					 selected="{sensorActive}" textAlign="center"/>
+
+</mx:Canvas>

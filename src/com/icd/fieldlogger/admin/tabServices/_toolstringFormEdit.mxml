@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:fieldinfosensorservice="services.fieldinfosensorservice.*"
+			   xmlns:fieldinfoassetservice="services.fieldinfoassetservice.*"
+			   xmlns:fieldtoolstringservice="services.fieldtoolstringservice.*"
+			   width="800" height="450" backgroundColor="#23AAE2" borderVisible="false"
+			   close="closeHandler(event)" fontSize="11" fontStyle="normal" fontWeight="normal"
+			   implements="icd.mgmtview.api.IManagementView" title="Tool String Edit">
+	<fx:Script>
+		<![CDATA[
+			import com.icd.fieldlogger.admin.tabSensor.sensorViewAll;
+			
+			import flash.events.Event;
+			
+			import icd.mgmtview.api.constant.ManagementViewConst;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import spark.events.DropDownEvent;
+			import spark.events.TextOperationEvent;
+			
+			import valueObjects.AllStatus;
+			import valueObjects.Allinfo_asset;
+			import valueObjects.Allinfo_assetAdvanced;
+			import valueObjects.Allinfo_sensor;
+			import valueObjects.Allinfo_toollist;
+			import valueObjects.Alltoolstring;
+			import valueObjects.AlltoolstringAdvanced;
+
+			
+			[Bindable] private var MODE:int;
+			[Bindable] private var titleName:String;
+			[Bindable] private var checkSave:Boolean = true;
+			[Bindable] public static var ToolstringVO:AlltoolstringAdvanced = new AlltoolstringAdvanced();
+			
+			
+			public function onApplicationResize(event:Event):void{}
+			protected function changeHandler():void{
+				checkSave = false;
+			}
+			protected function closeHandler(event:CloseEvent):void{
+				if(checkSave === true){
+					PopUpManager.removePopUp(this);
+				}else{
+					Alert.show("Click Yes to save your changes", "Please confirm",Alert.YES | Alert.NO, this, AlertSaveClosed, null, Alert.YES);	
+				}
+			}
+			protected function AlertSaveClosed(eventObj:CloseEvent):void {
+				if(eventObj.detail==Alert.YES) {
+					 if(ddlToolstringName.selectedIndex !== -1 && ddlToolstringSN.selectedIndex !== -1){
+						prepareSave();
+					}if(ddlToolstringName.selectedIndex === -1){
+						Alert.show('Please select "Name"','Fields with Asterisk (*)');
+					}if(ddlToolstringSN.selectedIndex === -1){
+						Alert.show('Please insert "S/N" (Serial Number)','Fields with Asterisk (*)');
+					}	 
+				}else if(eventObj.detail===Alert.NO) {
+					PopUpManager.removePopUp(this);
+				}
+			}
+			
+			public function prepareview(mode:int, titleName:String, objVO:Object=null):void{
+				this.title = titleName;
+				this.MODE = mode;
+				
+				if(this.MODE === ManagementViewConst.MODE_ADD){
+					ToolstringVO 						= new AlltoolstringAdvanced;
+					ToolstringVO.toolStringID			= "TS" + new Date().valueOf().toString(); 
+					ToolstringVO.toolString_serviceID	= _servicesFormEdit.serviceVO.serviceID;
+				}else if(this.MODE === ManagementViewConst.MODE_EDIT){
+					ToolstringVO = objVO as AlltoolstringAdvanced;
+					getField_infosensorByToolIDResult.token = fieldinfosensorService.getField_infosensorByToolID(ToolstringVO.toolID);
+				}
+				getAllField_infoassetActiveResult.token = fieldinfoassetService.getAllField_infoassetActive();
+			}
+			
+			/////**getAssetTool**/////
+			[Bindable] public var arrAssetName:ArrayCollection = new ArrayCollection();
+			protected function getAllField_infoassetActiveResult_resultHandler(event:ResultEvent):void{
+				arrAssetName = event.result as ArrayCollection;
+				if(ToolstringVO.toolString_assetID !== '') {
+					setAsset();
+				}
+			}
+			private function setAsset():void{
+				for each (var getAsset:Allinfo_assetAdvanced in arrAssetName) {
+					if(getAsset.toolID === ToolstringVO.toolString_assetID){
+						ddlToolstringName.selectedItem = getAsset;
+						break;
+					}
+				} 
+				getAllField_infoassetSerialNumberByToolIDResult.token = fieldinfoassetService.getAllField_infoassetSerialNumberByToolID(ToolstringVO.toolID);
+			}
+			
+			protected function lbtnSave_clickHandler(event:MouseEvent):void{
+				if(ddlToolstringName.selectedIndex !== -1 && ddlToolstringSN.selectedIndex !== -1){
+					Alert.show('Please confirm!', 'Confirm Save', Alert.YES | Alert.NO, this, AlerSave, null, Alert.YES);
+				}if(ddlToolstringName.selectedIndex === -1){
+					Alert.show('Please select "Name"','Fields with Asterisk (*)');
+				}if(ddlToolstringSN.selectedIndex === -1){
+					Alert.show('Please insert "S/N" (Serial Number)','Fields with Asterisk (*)');
+				}	
+			}
+			protected function AlerSave(eventObj:CloseEvent):void {
+				if(eventObj.detail==Alert.YES) {
+					prepareSave();
+				}
+			}
+			protected function prepareSave():void{
+				var updateToolstring:Alltoolstring 	= new Alltoolstring();
+				updateToolstring.toolStringNo			= ToolstringVO.toolStringNo;
+				updateToolstring.toolStringID			= ToolstringVO.toolStringID;
+				updateToolstring.toolString_serviceID	= ToolstringVO.toolString_serviceID;
+				updateToolstring.toolString_assetID		= ddlToolstringName.selectedItem.toolID;
+				updateToolstring.toolString_serialNo	= ddlToolstringSN.selectedItem.asset_serialNo;
+				updateToolstring.toolString_note		= txtNote.text;
+				if(this.MODE === ManagementViewConst.MODE_ADD){
+					createField_toolstringResult.token = fieldtoolstringService.createField_toolstring(updateToolstring);
+				}else if(this.MODE === ManagementViewConst.MODE_EDIT){
+					updateField_toolstringResult.token = fieldtoolstringService.updateField_toolstring(updateToolstring);
+				}
+			}
+			protected function toolstringResult_resultHandler(event:ResultEvent):void{
+				checkSave = true;
+				this.closeButton.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+			}
+
+			[Bindable] private var toolID:String;
+			[Bindable] private var serialNo:String;
+			protected function ddlToolstringName_closeHandler(event:DropDownEvent):void{
+				toolID = ddlToolstringName.selectedItem.toolID;
+				getField_infosensorByToolIDResult.token = fieldinfosensorService.getField_infosensorByToolID(toolID);
+				getAllField_infoassetSerialNumberByToolIDResult.token = fieldinfoassetService.getAllField_infoassetSerialNumberByToolID(toolID);
+			}
+			
+			
+			[Bindable] private var arrSerialNo:ArrayCollection = new ArrayCollection();
+			protected function getAllField_infoassetSerialNumberByToolIDResult_resultHandler(event:ResultEvent):void{
+				arrSerialNo = event.result as ArrayCollection;
+				if(ToolstringVO.toolString_serialNo !== '') {
+					setSerialNo();
+				}
+			}
+			private function setSerialNo():void{
+				for each (var getSerialNo:Allinfo_asset in arrSerialNo) {
+					if(getSerialNo.asset_serialNo === ToolstringVO.toolString_serialNo){
+						ddlToolstringSN.selectedItem = getSerialNo;
+						break;
+					}
+				} 
+			}
+			
+			[Bindable] public static var arrSensor:ArrayCollection = new ArrayCollection(); 
+			protected function getField_infosensorByToolIDResult_resultHandler(event:ResultEvent):void{
+				arrSensor = event.result as ArrayCollection;
+			}
+			
+			protected function ddlToolstringSN_closeHandler(event:DropDownEvent):void{
+				serialNo = ddlToolstringSN.selectedItem.asset_serialNo;
+			}
+
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<fieldinfosensorservice:FieldinfosensorService id="fieldinfosensorService"
+													   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+													   showBusyCursor="true"/>
+		<s:CallResponder id="getField_infosensorByToolIDResult" result="getField_infosensorByToolIDResult_resultHandler(event)"/>
+		
+		<fieldinfoassetservice:FieldinfoassetService id="fieldinfoassetService"
+													 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+													 showBusyCursor="true"/>
+		<s:CallResponder id="getAllField_infoassetActiveResult" result="getAllField_infoassetActiveResult_resultHandler(event)"/>
+		<s:CallResponder id="getAllField_infoassetSerialNumberByToolIDResult" result="getAllField_infoassetSerialNumberByToolIDResult_resultHandler(event)"/>
+		
+		<fieldtoolstringservice:FieldtoolstringService id="fieldtoolstringService"
+													   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+													   showBusyCursor="true"/>
+		<s:CallResponder id="createField_toolstringResult" result="toolstringResult_resultHandler(event)"/>
+		<s:CallResponder id="updateField_toolstringResult" result="toolstringResult_resultHandler(event)"/>
+	
+	
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:BorderContainer left="5" right="5" top="5" bottom="5" borderVisible="false" cornerRadius="5">
+		<s:Label left="10" top="5" height="20" fontSize="11" fontStyle="italic" fontWeight="bold"
+				 text="Tool String Infomation" textAlign="left" verticalAlign="middle"/>
+		<mx:HRule left="10" top="27" width="150"/>
+		<s:HGroup top="40" gap="20" horizontalCenter="0">
+			<s:VGroup gap="10">
+				<s:Label id="ddlToolName" width="80" height="25" color="#FF0000" fontFamily="Arial"
+						 fontSize="10" fontWeight="bold" text="*Asset Name :" textAlign="right"
+						 verticalAlign="middle"/>
+				<s:Label width="80" height="25" color="#FF0000" fontFamily="Arial" fontSize="10"
+						 fontWeight="bold" text="*Asset S/N :" textAlign="right" verticalAlign="middle"/>
+				<s:Label width="80" height="25" fontFamily="Arial" fontSize="10" text="Note :"
+						 textAlign="right" verticalAlign="middle"/>
+			</s:VGroup>
+			<s:VGroup gap="30">
+				<s:VGroup gap="10">
+					<s:DropDownList id="ddlToolstringName" width="500" height="25"
+									borderColor="#23AAE2" borderVisible="true"
+									dataProvider="{arrAssetName}"
+									close="ddlToolstringName_closeHandler(event);changeHandler()"
+									labelField="tool_name" toolTip="Please select Asset Tool"/>
+					<s:DropDownList id="ddlToolstringSN" width="500" height="25"
+									borderColor="#23AAE2" borderVisible="true"
+									dataProvider="{arrSerialNo}"
+									close="ddlToolstringSN_closeHandler(event);changeHandler()"
+									labelField="asset_serialNo" toolTip="Please select S/N"/>
+
+					<s:TextArea id="txtNote" width="500" height="60" borderColor="#23AAE2"
+								borderVisible="true" textAlign="left" change="changeHandler()"
+								text="{ToolstringVO.toolString_note}"/>
+				</s:VGroup>
+			</s:VGroup>
+			
+		</s:HGroup>
+		<mx:LinkButton id="lbtnSave" right="10" top="5" width="35" height="20"
+					   click="lbtnSave_clickHandler(event)" color="#000000"
+					   enabled="{checkSave === false}" focusColor="#70B2EE" fontWeight="bold"
+					   icon="@Embed(source='../images/save_before.png')" paddingLeft="0"
+					   paddingRight="0" toolTip="Click to Save"/>
+		<mx:LinkButton id="lbtnSaved" visible="{checkSave === true}" right="10" top="5" width="35"
+					   height="20" color="#000000" focusColor="#A2CBEA" fontSize="11"
+					   fontWeight="bold" icon="@Embed(source='../images/save_after.png')"
+					   paddingLeft="5" paddingRight="5" rollOverColor="#A2CBEA"
+					   selectionColor="#A2CBEA" toolTip="Saved"/>
+			<mx:DataGrid id="dgSensor" left="5" right="5" top="180" bottom="10" borderVisible="false"
+						 chromeColor="#23AAE2" dataProvider="{arrSensor}" fontFamily="Arial" fontSize="10"
+						 fontWeight="normal" variableRowHeight="true"
+						 verticalGridLineColor="0xFFFFFF">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Active" width="50" sortable="false" editable="false"
+									   headerStyleName="centerBold" itemRenderer="com.icd.fieldlogger.admin.tabSensor.sensorActiveCheckbox"/>
+					<mx:DataGridColumn width="50" dataField="" headerText="Color" textAlign="center"
+									   wordWrap="true" headerStyleName="centerBold"
+									   itemRenderer="com.icd.fieldlogger.admin.tabSensor.sensorColorPicker"/>
+					<mx:DataGridColumn dataField="sensor_name" headerText="Sensor Name" textAlign="center"
+									   wordWrap="true" headerStyleName="centerBold"/>
+					<mx:DataGridColumn width="80" dataField="sensor_unit" headerText="Unit" editable="false" textAlign="center"
+									   headerStyleName="centerBold" wordWrap="true"/>
+					<mx:DataGridColumn width="80" dataField="sensor_gain_a" headerText="a" editable="false" textAlign="center"
+									   headerStyleName="centerBold" wordWrap="true"/>
+					<mx:DataGridColumn width="80" dataField="sensor_offset_b" headerText="b" editable="false" textAlign="center"
+									   headerStyleName="centerBold" wordWrap="true"/>
+					<mx:DataGridColumn width="80" dataField="sensor_min" headerText="Min" editable="false" textAlign="center"
+									   headerStyleName="centerBold" wordWrap="true"/>
+					<mx:DataGridColumn width="80" dataField="sensor_max" headerText="Max" editable="false" textAlign="center"
+									   headerStyleName="centerBold" wordWrap="true"/>
+				</mx:columns>
+			</mx:DataGrid>
+	</s:BorderContainer>
+	
+</s:TitleWindow>

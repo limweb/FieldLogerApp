@@ -1,0 +1,50 @@
+
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   xmlns:fieldinfoassetsensorservice="services.fieldinfoassetsensorservice.*"
+		   width="100%" chromeColor="#F08080"
+		   creationComplete="canvas_creationCompleteHandler(event)" fontFamily="Arial" fontSize="11">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.icd.fieldlogger.admin.tabServices._servicesFormEdit;
+			import com.icd.fieldlogger.admin.tabServices._toolstringFormEdit;
+			import com.icd.fieldlogger.admin.tabTools.toolsListFormEdit;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.Allinfo_asset_sensor;
+			import valueObjects.Allinfo_sensor;
+			import valueObjects.Alltoolstring;
+
+			
+			[Bindable] private var sensorActive:Boolean;
+			protected function canvas_creationCompleteHandler(event:FlexEvent):void{
+				getAllfield_infoasset_sensorByassetIDResult.token = fieldinfoassetsensorService.getAllfield_infoasset_sensorByassetID(_sensorViewUsed.viewsensorVO.toolStringID)
+			}
+			[Bindable] private var arrToolstringSensor:ArrayCollection = new ArrayCollection();
+			protected function getAllfield_infoasset_sensorByassetIDResult_resultHandler(event:ResultEvent):void{
+				arrToolstringSensor = event.result as ArrayCollection;
+				for each(var item:Allinfo_asset_sensor in arrToolstringSensor){
+					if(item.ts_sensorID === data.ts_sensorID){
+						sensorActive = true;
+					}
+				}
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		
+		<fieldinfoassetsensorservice:FieldinfoassetsensorService id="fieldinfoassetsensorService"
+																 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+																 showBusyCursor="true"/>
+		<s:CallResponder id="getAllfield_infoasset_sensorByassetIDResult" result="getAllfield_infoasset_sensorByassetIDResult_resultHandler(event)"/>
+	</fx:Declarations>
+	<mx:LinkButton visible="{sensorActive}" top="0" width="16" height="16" horizontalCenter="0"
+				   icon="@Embed(source='../images/tick.png')" mouseEnabled="false"/>
+</mx:Canvas>

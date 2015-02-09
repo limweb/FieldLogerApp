@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Module xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%"
+		  creationComplete="creationCompleteHandler(event)" xmlns:fieldinfoserviceservice="services.fieldinfoserviceservice.*">
+	<fx:Script>
+		<![CDATA[
+			import icd.mgmtview.api.constant.ManagementViewConst;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.Allinfo_service;
+			import valueObjects.Allinfo_serviceAdvanced;
+			
+			protected function creationCompleteHandler(event:FlexEvent):void{
+				getAllField_infoserviceAdvancedResult.token = fieldinfoserviceService.getAllField_infoserviceAdvanced();
+			}
+			
+			[Bindable] private var arrService:ArrayCollection = new ArrayCollection();
+			protected function getAllField_infoserviceAdvancedResult_resultHandler(event:ResultEvent):void{
+				arrService = event.result as ArrayCollection;
+			}
+			
+			protected function lbtnAddServiceAsset_clickHandler(event:MouseEvent):void{
+				var ttwdEdit:servicesAssetFormEdit = new servicesAssetFormEdit();
+				ttwdEdit.prepareview(ManagementViewConst.MODE_ADD,"Create New Asset Service");
+				PopUpManager.addPopUp(ttwdEdit,this,true);
+				ttwdEdit.isPopUp = true; 
+				ttwdEdit.addEventListener(CloseEvent.CLOSE, alphaPopupCloseHandler);
+			}
+			
+			public function alertEdit():void{
+				var ttwdEdit:servicesAssetFormEdit = new servicesAssetFormEdit();
+				ttwdEdit.prepareview(ManagementViewConst.MODE_EDIT,"Update Asset Service", dgService.selectedItem as Allinfo_serviceAdvanced);
+				PopUpManager.addPopUp(ttwdEdit,this,true);
+				ttwdEdit.isPopUp = true; 
+				ttwdEdit.addEventListener(CloseEvent.CLOSE, alphaPopupCloseHandler);
+			}
+			
+			[Bindable] private var dgSelectedNo:int;
+			public function alertDelete():void{
+				dgSelectedNo = dgService.selectedItem.serviceNo;
+				Alert.show("Are you sure?", "Confirm Delete", Alert.YES | Alert.NO, this, deleteRow, null, Alert.YES);
+			}
+			protected function deleteRow(eventObj:CloseEvent):void {
+				if(eventObj.detail==Alert.YES) {
+					deleteField_infoserviceResult.token = fieldinfoserviceService.deleteField_infoservice(dgSelectedNo);
+				}
+			}
+			
+			protected function deleteField_infoserviceResult_resultHandler(event:ResultEvent):void{
+				getAllField_infoserviceAdvancedResult.token = fieldinfoserviceService.getAllField_infoserviceAdvanced();
+			}
+			private function alphaPopupCloseHandler(e:CloseEvent):void{
+				getAllField_infoserviceAdvancedResult.token = fieldinfoserviceService.getAllField_infoserviceAdvanced();
+			}
+			protected function lbtnRefresh_clickHandler(event:MouseEvent):void{
+				getAllField_infoserviceAdvancedResult.token = fieldinfoserviceService.getAllField_infoserviceAdvanced();
+			}
+			public function alertSensor():void{
+				var ttwdEdit:servicesToolstringView = new servicesToolstringView();
+				ttwdEdit.prepareview(ManagementViewConst.MODE_EDIT, null, dgService.selectedItem as Allinfo_serviceAdvanced);
+				PopUpManager.addPopUp(ttwdEdit,this,true);
+				PopUpManager.centerPopUp(ttwdEdit);
+				ttwdEdit.isPopUp = true; 
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<fieldinfoserviceservice:FieldinfoserviceService id="fieldinfoserviceService"
+														 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+														 showBusyCursor="true"/>
+		<s:CallResponder id="getAllField_infoserviceAdvancedResult" result="getAllField_infoserviceAdvancedResult_resultHandler(event)"/>
+		<s:CallResponder id="deleteField_infoserviceResult" result="deleteField_infoserviceResult_resultHandler(event)"/>
+		
+
+	</fx:Declarations>
+	<s:BorderContainer left="2" right="2" top="2" bottom="2" borderVisible="false">
+		<s:Scroller left="0" right="0" top="0" bottom="0">
+			<s:Group width="100%" height="100%" chromeColor="#FF9999" fontFamily="Arial" fontSize="10">
+				<mx:DataGrid id="dgService" left="5" right="5" top="35" bottom="5" borderVisible="false"
+							 chromeColor="#23AAE2" dataProvider="{arrService}" fontFamily="Arial" fontSize="10"
+							 fontWeight="normal" variableRowHeight="true"
+							 verticalGridLineColor="0xFFFFFF">
+					<mx:columns>
+						<mx:DataGridColumn width="50" dataField="" headerText="" textAlign="center"
+										   headerStyleName="centerBold">
+							<mx:itemRenderer>
+								<fx:Component>
+									<mx:HBox horizontalAlign="center" verticalAlign="top" width="70">
+										<mx:LinkButton id="btnGridDelete" icon="@Embed(source='../images/delete.png')" width="16" height="16"
+													   toolTip="Click to delete" click="outerDocument.alertDelete()"/>
+										<mx:LinkButton id="btnGridEdit" icon="@Embed(source='../images/modify12.png')"  width="16" height="16"
+													   toolTip="Click to edit" click="outerDocument.alertEdit()"/>
+									</mx:HBox>
+								</fx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn width="60" dataField="" headerText="Active" textAlign="center"
+										   headerStyleName="centerBold">
+							<mx:itemRenderer>
+								<fx:Component>
+									<mx:HBox horizontalAlign="center">
+										<mx:LinkButton icon="@Embed(source='../images/tick.png')" width="16" height="16" mouseEnabled="false"
+													   visible="{data.service_active === '1'}"/>
+									</mx:HBox>
+								</fx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn width="400" dataField="slist_name" headerText="Service Name" textAlign="center"
+										   headerStyleName="centerBold"/>
+						<mx:DataGridColumn width="150" dataField="" headerText="Tool String" textAlign="center"
+										   headerStyleName="centerBold">
+							<mx:itemRenderer>
+								<fx:Component>
+									<mx:HBox horizontalAlign="center" verticalAlign="top">
+										<mx:Canvas>
+											<mx:LinkButton icon="@Embed(source='../images/toolbox.png')" width="16" height="16"
+														   toolTip="Click to view Tool String" visible="{data.service_sensor === '1'}" 
+														   click="outerDocument.alertSensor()"/>
+										</mx:Canvas>
+									</mx:HBox>
+								</fx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn dataField="service_note" headerText="Note" textAlign="left"
+										   wordWrap="true" headerStyleName="centerBold"/>
+					</mx:columns>
+				</mx:DataGrid>
+				
+				<s:HGroup left="10" top="4" height="25" color="#000000">
+					<mx:LinkButton id="lbtnAddUser" height="25" label="Add New Service"
+								   click="lbtnAddServiceAsset_clickHandler(event)" color="#000000"
+								   fontSize="10" fontStyle="italic" fontWeight="bold"
+								   icon="@Embed(source='../images/add1.png')" paddingLeft="5"
+								   paddingRight="5" toolTip="start synchronization"/>
+					<mx:LinkButton id="lbtnRefresh" width="30" height="25"
+								   click="lbtnRefresh_clickHandler(event)" color="#007C7B"
+								   focusColor="#70B2EE" fontWeight="bold"
+								   icon="@Embed(source='../images/refresh.png')" paddingLeft="5"
+								   paddingRight="5" toolTip="Refresh"/>
+				</s:HGroup>
+				
+			</s:Group>
+		</s:Scroller>
+	</s:BorderContainer>
+</s:Module>

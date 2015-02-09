@@ -1,0 +1,162 @@
+<s:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:pdqinfoservice="services.pdqinfoservice.*"
+		  xmlns:empinfoservice="services.empinfoservice.*"
+		  width="100%" height="100%" backgroundColor="#23AAE2" chromeColor="#23AAE2"
+		  creationComplete="creationCompleteHandler(event)" fontFamily="Arial" fontSize="10"
+		  resize="resizeHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.hurlant.crypto.symmetric.CTRMode;
+			import com.icd.fieldlogger.admin.tabInfo.projectInfoModule;
+			import com.icd.fieldlogger.admin.tabServices.serviceslistModule;
+			import com.icd.fieldlogger.admin.tabTools.toolsListModule;
+			
+			import icd.app.constant.ApplicationConstant;
+			import icd.utils.LDAPUtils;
+			
+			import mx.charts.BarChart;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.core.IVisualElement;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ItemClickEvent;
+			import mx.events.ResizeEvent;
+			import mx.managers.PopUpManager;
+			import mx.modules.Module;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.EmployeeInfo;
+			
+			protected function creationCompleteHandler(event:FlexEvent):void {
+				changeMenu(new projectInfoModule());
+			}
+			[Bindable] public static var empVO:EmployeeInfo = new EmployeeInfo();
+			protected function getPdq_EmployeebasicInfoResult_resultHandler(event:ResultEvent):void{
+				empVO = event.result as EmployeeInfo;
+			}
+			private function changeMenu(module:Module):void{
+				grpViewPDQ.removeAllElements();
+				grpViewPDQ.addElement(module as IVisualElement);
+			}
+			
+			protected function lb1_itemClickHandler(event:ItemClickEvent):void {
+				var changeModule:Module;
+				var titleName:String;
+				switch(event.index)
+				{
+					case 0:
+					{
+						changeModule = new projectInfoModule();
+						break;
+					}	
+					case 1:
+					{
+						changeModule = new toolsListModule();
+						break;
+					}
+					case 2:
+					{
+						changeModule = new serviceslistModule();
+						break;
+					}
+							/* case 3:
+						{
+						changeModule = new linechartModule();
+						break;
+						}  
+							case 4:
+						{
+						changeModule = new barchartModule();
+						break;
+						}	 */
+						
+					default:
+					{
+						break;
+					}
+				}
+				changeMenu(changeModule); 
+			}
+			
+			[Bindable] private var cStart:uint = 0xB5B5B5;
+			[Bindable] private var cStop:uint  = 0xB5B5B5;
+			protected function lbtnStart_clickHandler(event:MouseEvent):void{
+				cStart = 0x2FAF2C;
+				cStop  = 0xB5B5B5;
+			}
+			
+			protected function lbtnStop_clickHandler(event:MouseEvent):void{
+				cStart = 0xB5B5B5;
+				cStop  = 0xFF0000;
+			}
+			
+			protected function resizeHandler(event:ResizeEvent):void{
+				this.height = parentApplication.height;
+				this.width  = parentApplication.width;
+			}
+			
+			protected function lbtnExit_clickHandler(event:MouseEvent):void{
+				PopUpManager.removePopUp(this);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<empinfoservice:EmpinfoService id="empinfoService"
+									   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+									   showBusyCursor="true"/>
+		<s:CallResponder id="getEmp_infoByEmailResult"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:BorderContainer left="10" right="10" top="10" bottom="10" borderVisible="false"
+					   cornerRadius="10" fontFamily="Arial" fontSize="12" horizontalCenter="0"
+					   verticalCenter="0">		
+		<s:Label x="10" y="10" width="600" color="#878787" fontFamily="Arial" fontSize="18"
+				 text="ADMIN SETTING"/>	
+		<s:BorderContainer left="10" right="10" top="35" height="30" borderColor="#23AAE2"
+						   borderWeight="2" chromeColor="#23AAE2" cornerRadius="5">
+			<s:HGroup left="5" height="25" contentBackgroundColor="#FFFFFF" gap="6"
+					  verticalCenter="0">
+				<mx:LinkBar id="lb1" left="5" height="25" color="#000000"
+							dataProvider="{viewStack}"
+							fontFamily="Arial" fontSize="11" fontWeight="normal"
+							itemClick="lb1_itemClickHandler(event)" paddingBottom="0"
+							paddingLeft="10" paddingRight="10" paddingTop="0" verticalAlign="middle">
+				</mx:LinkBar>
+			</s:HGroup>
+			<s:HGroup right="5" gap="5" verticalCenter="0">
+				<s:Label height="20" color="#B2B2B2" fontFamily="Arial" fontSize="10"
+						 fontWeight="bold" paddingLeft="5" paddingRight="5" text="WELCOME :"
+						 textAlign="left" verticalAlign="middle"/>
+				<s:Label height="20" color="#B2B2B2" fontFamily="Arial" fontSize="10"
+						 fontWeight="bold" paddingLeft="5" paddingRight="5" text="{empVO.Ename} ({empVO.business})"
+						 textAlign="center" verticalAlign="middle" toolTip="{ApplicationConstant.USER.userType}"/>	
+				<mx:VRule height="20"/>
+				<mx:LinkButton id="lbtnExit" width="35" height="20"
+							   click="lbtnExit_clickHandler(event)"
+							   fontWeight="normal" icon="@Embed(source='../images/door_in.png')"
+							   paddingLeft="5" paddingRight="5" toolTip="Log Out"/>
+			</s:HGroup>
+		</s:BorderContainer>		
+		
+		<s:BorderContainer id="grpViewPDQ" left="10" right="10" top="70" bottom="10"
+						   borderColor="#23AAE2" borderWeight="2" chromeColor="#23AAE2"
+						   cornerRadius="5">
+			<mx:ViewStack id="viewStack" left="0" right="0" top="0" bottom="0">
+				<s:NavigatorContent width="100%" height="100%" label="Infomation"  icon="@Embed(source='../images/application_form_edit.png')">
+				</s:NavigatorContent>
+				<s:NavigatorContent width="100%" height="100%" label="Tools" icon="@Embed(source='../images/setting_tools.png')">
+				</s:NavigatorContent>
+				<s:NavigatorContent width="100%" height="100%" label="Services" icon="@Embed(source='../images/control_panel.png')">
+				</s:NavigatorContent>
+			</mx:ViewStack>
+		</s:BorderContainer>
+		
+	</s:BorderContainer>
+	
+</s:Module>

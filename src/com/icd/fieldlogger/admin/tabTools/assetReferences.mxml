@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:fieldreportreferenceservice="services.fieldreportreferenceservice.*"
+			   width="800" height="600" backgroundColor="#23AAE2" close="closeHandler(event)"
+			   fontSize="11" fontWeight="bold" title="Reference Files"
+			   creationComplete="creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			[Bindable] public var assetID:String;
+			
+			protected function closeHandler(event:CloseEvent):void{
+				PopUpManager.removePopUp(this);
+			}
+			protected function creationCompleteHandler(event:FlexEvent):void{
+				getField_referenceByreportIDResult.token = fieldreportreferenceService.getField_referenceByreportID(assetID);
+			}
+			
+			[Bindable] private var arrRef:ArrayCollection = new ArrayCollection();
+			protected function getField_referenceByreportIDResult_resultHandler(event:ResultEvent):void{
+				arrRef = event.result as ArrayCollection;
+			}
+			
+			public function alertView():void{
+				var urlReq:URLRequest = new URLRequest();
+				urlReq = new URLRequest('../fieldlogger/upload_documents/' + dgReference.selectedItem.ref_name);
+				navigateToURL(urlReq, "_blank");
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		
+		<fieldreportreferenceservice:FieldreportreferenceService id="fieldreportreferenceService"
+																 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+																 showBusyCursor="true"/>
+		<s:CallResponder id="getField_referenceByreportIDResult" result="getField_referenceByreportIDResult_resultHandler(event)"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:BorderContainer left="5" right="5" top="5" bottom="5" borderVisible="false" cornerRadius="5">
+		<mx:DataGrid id="dgReference" left="5" right="5" top="5" bottom="5" borderVisible="false"
+					 chromeColor="#23AAE2" dataProvider="{arrRef}" fontFamily="Arial" fontSize="10"
+					 fontWeight="normal" variableRowHeight="true"
+					 verticalGridLineColor="0xFFFFFF">
+			<mx:columns>
+				<mx:DataGridColumn width="50" dataField="" headerText="Ref" textAlign="center"
+								   headerStyleName="centerBold">
+					<mx:itemRenderer>
+						<fx:Component>
+							<mx:HBox horizontalAlign="center" verticalAlign="top">
+								<mx:Canvas>
+									<mx:LinkButton icon="@Embed(source='../images/attach.png')" width="16" height="16"
+												   toolTip="Click to delete"
+												   click="outerDocument.alertView()"/>
+								</mx:Canvas>
+							</mx:HBox>
+						</fx:Component>
+					</mx:itemRenderer>
+				</mx:DataGridColumn>
+				<mx:DataGridColumn width="250" dataField="ref_name" headerText="File Name" textAlign="left"
+								   headerStyleName="centerBold"/>
+				<mx:DataGridColumn width="150" dataField="ref_by" headerText="By" editable="false" textAlign="center"
+								   headerStyleName="centerBold" wordWrap="true"/>
+				<mx:DataGridColumn dataField="ref_note" headerText="Note" textAlign="left"
+								   wordWrap="true" headerStyleName="centerBold"/>
+			</mx:columns>
+		</mx:DataGrid>
+	</s:BorderContainer>
+</s:TitleWindow>

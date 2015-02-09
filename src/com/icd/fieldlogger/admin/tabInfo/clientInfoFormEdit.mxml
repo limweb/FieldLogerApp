@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:fieldinfoprojectservice="services.fieldinfoprojectservice.*"
+			   xmlns:fieldinfoclientservice="services.fieldinfoclientservice.*"
+			   width="800" height="600" backgroundColor="#23AAE2" close="closeHandler(event)"
+			   fontSize="11" implements="icd.mgmtview.api.IManagementView" title="{titleName}">
+	<fx:Script>
+		<![CDATA[
+			import flash.events.Event;
+			
+			import icd.mgmtview.api.constant.ManagementViewConst;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import spark.events.TextOperationEvent;
+			
+			import valueObjects.Allinfo_client;
+
+			[Bindable] private var titleName:String;
+			[Bindable] private var MODE:int;
+			[Bindable] private var checkSave:Boolean = true;
+			[Bindable] public static var infoclientVO:Allinfo_client = new Allinfo_client();
+			
+			public function onApplicationResize(event:Event):void{}
+			protected function changeHandler():void{
+				checkSave = false;
+			}
+			protected function closeHandler(event:CloseEvent):void{
+				if(checkSave === true){
+					PopUpManager.removePopUp(this);
+				}else{
+					Alert.show("Click Yes to save your changes", "Please confirm", Alert.YES | Alert.NO, this, AlertSaveClosed, null, Alert.YES);	
+				}
+			}
+			protected function AlertSaveClosed(eventObj:CloseEvent):void {
+				if(eventObj.detail==Alert.YES) {
+					if(txtFirstname.text !== "" && txtCompany.text !== ""){
+						prepareSave();
+					}if(txtFirstname.text === ""){
+						Alert.show('Please enter "Contact Name"','Fields with Asterisk (*)');
+					}if(txtCompany.text === ""){
+						Alert.show('Please enter "Company Name"','Fields with Asterisk (*)');
+					}
+				}else if(eventObj.detail===Alert.NO) {
+					PopUpManager.removePopUp(this);
+				}
+			}
+			
+			public function prepareview(mode:int, titleName:String, objVO:Object=null):void{
+				this.title = titleName
+				this.MODE = mode;
+				if(this.MODE === ManagementViewConst.MODE_ADD){
+					infoclientVO 						= new Allinfo_client();
+					infoclientVO.infoclientID			= "INFO_C" + new Date().valueOf().toString();
+					infoclientVO.infoclient_active		= "1";
+				}else if(this.MODE === ManagementViewConst.MODE_EDIT){
+					infoclientVO = objVO as Allinfo_client;
+				}
+			}
+			
+			protected function lbtnSave_clickHandler(event:MouseEvent):void{
+				if(txtFirstname.text !== "" && txtCompany.text !== ""){
+					Alert.show('Please confirm!', 'Confirm Save', Alert.YES | Alert.NO, this, AlerSave, null, Alert.YES);
+				}if(txtFirstname.text === ""){
+					Alert.show('Please enter "Contact Name"','Fields with Asterisk (*)');
+				}if(txtCompany.text === ""){
+					Alert.show('Please enter "Company Name"','Fields with Asterisk (*)');
+				}
+			}
+			
+			protected function AlerSave(eventObj:CloseEvent):void {
+				if(eventObj.detail==Alert.YES) {
+					prepareSave();
+				}
+			}
+			
+			protected function prepareSave():void{
+				var updateClient:Allinfo_client = new Allinfo_client();
+				updateClient.infoclientNo 			= infoclientVO.infoclientNo;
+				updateClient.infoclientID			= infoclientVO.infoclientID;
+				updateClient.infoclient_firstname	= txtFirstname.text;
+				updateClient.infoclient_lastname	= txtLastname.text;
+				updateClient.infoclient_company		= txtCompany.text;
+				updateClient.infoclient_address1	= txtAddress1.text;
+				updateClient.infoclient_address2	= txtAddress2.text;
+				updateClient.infoclient_city		= txtCity.text;
+				updateClient.infoclient_state		= txtState.text;
+				updateClient.infoclient_postalcode	= txtPostal.text;
+				updateClient.infoclient_telephone	= txtTel.text;
+				updateClient.infoclient_email		= txtEmail.text;
+				updateClient.infoclient_note		= txtNote.text; 
+				updateClient.infoclient_active		= chkActive.selected? "1":"0";
+				if(this.MODE === ManagementViewConst.MODE_ADD){
+					createField_infoclientResult.token = fieldinfoclientService.createField_infoclient(updateClient);
+				}else if(this.MODE === ManagementViewConst.MODE_EDIT){
+					updateField_infoclientResult.token = fieldinfoclientService.updateField_infoclient(updateClient);
+				}
+			}
+			
+			protected function infoclientResult_resultHandler(event:ResultEvent):void{
+				checkSave = true;
+				this.closeButton.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		
+		
+		<fieldinfoclientservice:FieldinfoclientService id="fieldinfoclientService"
+													   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+													   showBusyCursor="true"/>
+		<s:CallResponder id="createField_infoclientResult" result="infoclientResult_resultHandler(event)"/>
+		<s:CallResponder id="updateField_infoclientResult" result="infoclientResult_resultHandler(event)"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:BorderContainer left="5" right="5" top="5" bottom="5" borderVisible="false"
+					   cornerRadius="5">
+
+	<s:BorderContainer top="50" height="502" borderVisible="false" horizontalCenter="0">
+		<s:HGroup gap="15">
+			<s:VGroup left="5" top="5" fontSize="10" gap="20">
+				<s:Label width="100" height="25" color="#FF0000" fontWeight="bold"
+						 text="* Contact Name :" textAlign="right" verticalAlign="middle"/>
+				<s:Label width="100" height="25" color="#FF0000" fontWeight="bold" text="* Company :"
+						 textAlign="right" verticalAlign="middle"/>
+				<s:Label width="100" height="25" text="Address 1 :" textAlign="right"
+						 verticalAlign="middle"/>
+				<s:Label width="100" height="25" text="Address 2 :" textAlign="right"
+						 verticalAlign="middle"/>
+				<s:Label width="100" height="25" text="City :" textAlign="right"
+						 verticalAlign="middle"/>
+				<s:Label width="100" height="25" text="State :" textAlign="right"
+						 verticalAlign="middle"/>
+				<s:Label width="100" height="25" text="Postal Code :" textAlign="right"
+						 verticalAlign="middle"/>
+				<s:Label width="100" height="25" text="Telephone :" textAlign="right"
+						 verticalAlign="middle"/>
+				<s:Label width="100" height="25" text="Email :" textAlign="right"
+						 verticalAlign="middle"/>
+				<s:Label width="100" height="25" text="Note :" textAlign="right"
+						 verticalAlign="middle"/>
+			</s:VGroup>
+			<s:VGroup gap="20">
+				<s:HGroup>
+					<s:TextInput id="txtFirstname" width="200" height="25" borderColor="#23AAE2"
+								 borderVisible="true" change="changeHandler()" 
+								 text="{infoclientVO.infoclient_firstname}"/>
+					<s:TextInput id="txtLastname" width="200" height="25" borderColor="#23AAE2"
+								 borderVisible="true" change="changeHandler()"
+								 text="{infoclientVO.infoclient_lastname}"/>
+					<s:CheckBox  id="chkActive" height="25" label="Active" fontSize="11" fontWeight="normal"
+								 selected="{infoclientVO.infoclient_active === '1'}" change="changeHandler()"/>
+				</s:HGroup>
+				<s:TextInput id="txtCompany" width="405" height="25" borderColor="#23AAE2" change="changeHandler()"
+							 borderVisible="true" text="{infoclientVO.infoclient_company}"/>
+				<s:TextInput id="txtAddress1" width="405" height="25" borderColor="#23AAE2" change="changeHandler()"
+							 borderVisible="true" text="{infoclientVO.infoclient_address1}"/>
+				<s:TextInput id="txtAddress2" width="405" height="25" borderColor="#23AAE2" change="changeHandler()"
+							 borderVisible="true" text="{infoclientVO.infoclient_address2}"/>
+				<s:TextInput id="txtCity" width="405" height="25" borderColor="#23AAE2" change="changeHandler()"
+							 borderVisible="true" text="{infoclientVO.infoclient_city}"/>
+				<s:TextInput id="txtState" width="405" height="25" borderColor="#23AAE2" change="changeHandler()"
+							 borderVisible="true" text="{infoclientVO.infoclient_state}"/>
+				<s:TextInput id="txtPostal" width="405" height="25" borderColor="#23AAE2" change="changeHandler()"
+							 borderVisible="true" text="{infoclientVO.infoclient_postalcode}"/>
+				<s:TextInput id="txtTel" width="405" height="25" borderColor="#23AAE2" change="changeHandler()"
+							 borderVisible="true" text="{infoclientVO.infoclient_telephone}"/>
+				<s:TextInput id="txtEmail" width="405" height="25" borderColor="#23AAE2" change="changeHandler()"
+							 borderVisible="true" text="{infoclientVO.infoclient_email}"/>
+				<s:TextArea id="txtNote" width="405" height="75" borderColor="#23AAE2" change="changeHandler()"
+							borderVisible="true" text="{infoclientVO.infoclient_note}"/>
+				
+			</s:VGroup>
+		</s:HGroup>
+		
+	</s:BorderContainer>
+	
+		<mx:LinkButton id="lbtnSave" right="10" top="10" width="35" height="20"
+					   click="lbtnSave_clickHandler(event)" color="#000000"
+					   enabled="{checkSave === false}" focusColor="#70B2EE" fontWeight="bold"
+					   icon="@Embed(source='../images/save_before.png')" paddingLeft="0"
+					   paddingRight="0" toolTip="Click to Save"/>
+		<mx:LinkButton id="lbtnSaved" visible="{checkSave === true}" right="10" top="10" width="35"
+					   height="20" color="#000000" focusColor="#A2CBEA" fontSize="11"
+					   fontWeight="bold" icon="@Embed(source='../images/save_after.png')"
+					   paddingLeft="5" paddingRight="5" rollOverColor="#A2CBEA"
+					   selectionColor="#A2CBEA" toolTip="Saved"/>
+		<s:Label left="10" top="5" height="20" fontSize="11" fontStyle="italic" fontWeight="bold"
+				 text="Client Infomation" textAlign="left" verticalAlign="middle"/>
+		<mx:HRule left="10" top="25" width="120"/>
+		
+	</s:BorderContainer>
+</s:TitleWindow>

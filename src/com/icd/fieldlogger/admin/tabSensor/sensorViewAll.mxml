@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="800" height="600" backgroundColor="#23AAE2" borderVisible="false"
+			   fontSize="11" title="Sensor" close="closeHandler(event)"
+			   creationComplete="creationCompleteHandler(event)" 
+			   xmlns:fieldinfosensorservice="services.fieldinfosensorservice.*" 
+			   implements="icd.mgmtview.api.IManagementView">
+	<fx:Script>
+		<![CDATA[
+			
+			import flash.events.Event;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.Allinfo_toollist;
+
+			
+			[Bindable] private var toollistVO:Allinfo_toollist = new Allinfo_toollist;
+			public function onApplicationResize(event:Event):void{}
+			protected function closeHandler(event:CloseEvent):void{
+				PopUpManager.removePopUp(this);
+			}
+			
+			public function prepareview(mode:int, titleName:String, objVO:Object=null):void{
+				toollistVO = objVO as Allinfo_toollist;
+			}
+			
+			protected function creationCompleteHandler(event:FlexEvent):void{
+				getField_infosensorByToolIDResult.token = fieldinfosensorService.getField_infosensorByToolID(toollistVO.toolID);
+			}
+			
+			[Bindable] private var arrSensor:ArrayCollection = new ArrayCollection(); 
+			protected function getField_infosensorByToolIDResult_resultHandler(event:ResultEvent):void{
+				arrSensor = event.result as ArrayCollection;
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		
+		<fieldinfosensorservice:FieldinfosensorService id="fieldinfosensorService"
+													   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+													   showBusyCursor="true"/>
+		<s:CallResponder id="getField_infosensorByToolIDResult" result="getField_infosensorByToolIDResult_resultHandler(event)"/>
+	</fx:Declarations>
+	<s:BorderContainer left="5" right="5" top="5" bottom="5" borderVisible="false" cornerRadius="5">
+		<mx:DataGrid id="dgReferences" left="5" right="5" top="40" bottom="5" borderVisible="false"
+					 chromeColor="#23AAE2" dataProvider="{arrSensor}" fontFamily="Arial" fontSize="10"
+					 fontWeight="normal" variableRowHeight="true"
+					 verticalGridLineColor="0xFFFFFF">
+			<mx:columns>
+				<mx:DataGridColumn dataField="sensor_name" headerText="Sensor Name" textAlign="center"
+								   wordWrap="true" headerStyleName="centerBold"/>
+				<mx:DataGridColumn width="100" dataField="sensor_unit" headerText="Unit" textAlign="center"
+								   headerStyleName="centerBold"/>
+				<mx:DataGridColumn width="100" dataField="sensor_gain_a" headerText="a" textAlign="center"
+								   headerStyleName="centerBold"/>
+				<mx:DataGridColumn width="100" dataField="sensor_offset_b" headerText="b" textAlign="center"
+								   headerStyleName="centerBold"/>
+				<mx:DataGridColumn width="100" dataField="sensor_min" headerText="Min" textAlign="center"
+								   headerStyleName="centerBold"/>
+				<mx:DataGridColumn width="100" dataField="sensor_max" headerText="Max" textAlign="center"
+								   headerStyleName="centerBold"/>
+				
+				
+			</mx:columns>
+		</mx:DataGrid>
+		<s:HGroup left="5" right="5" top="10" gap="15" verticalAlign="middle">
+			<s:Label height="20" fontSize="10" fontWeight="normal" text="Tool Name : " textAlign="left"
+					 verticalAlign="middle"/>
+			<s:Label height="20" color="#000000" fontSize="10" fontStyle="italic" fontWeight="bold"
+					 text="{toollistVO.tool_name}" verticalAlign="middle"/>
+			<mx:LinkButton id="lbtnNote" visible="{toollistVO.tool_note !== ''}" right="10"
+						   top="5" width="20" height="20" color="#000000" focusColor="#A2CBEA"
+						   fontSize="11" fontWeight="bold"
+						   icon="@Embed(source='../images/script_text.png')" paddingLeft="0"
+						   paddingRight="0" toolTip="{toollistVO.tool_note}"/>
+		</s:HGroup>
+		<!--</s:Panel>-->
+	</s:BorderContainer>
+	
+</s:TitleWindow>

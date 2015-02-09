@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:fieldinfoserviceassetservice="services.fieldinfoserviceassetservice.*"
+			   xmlns:fieldinfoservicelistassetdefaultservice="services.fieldinfoservicelistassetdefaultservice.*"
+			   implements="icd.mgmtview.api.IManagementView"
+			   width="600" height="450" close="closeHandler(event)"
+			   creationComplete="creationCompleteHandler(event)" title="Asset Tools Default">
+	<fx:Script>
+		<![CDATA[
+			import flash.events.Event;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.DragEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.Allinfo_service_asset;
+			import valueObjects.Allinfo_servicelist;
+			import valueObjects.Allinfo_servicelist_assetdefault;
+			
+			[Bindable] public static var slistVO:Allinfo_servicelist = new Allinfo_servicelist;
+			
+			protected function closeHandler(event:CloseEvent):void{
+				PopUpManager.removePopUp(this);
+			}
+			public function onApplicationResize(event:Event):void{}
+			public function prepareview(mode:int, titleName:String, objVO:Object=null):void{
+				slistVO = objVO as Allinfo_servicelist;
+			}
+			
+			protected function creationCompleteHandler(event:FlexEvent):void{
+				getField_infoservicelist_assetdefaultByslistIDResult.token = fieldinfoservicelistassetdefaultService.getField_infoservicelist_assetdefaultByslistID(slistVO.slistID);
+			}
+			
+			[Bindable] private var arrAssetDefault:ArrayCollection = new ArrayCollection();
+			protected function getField_infoservicelist_assetdefaultByslistIDResult_resultHandler(event:ResultEvent):void{
+				arrAssetDefault = event.result as ArrayCollection;
+			}
+			
+			
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+
+		
+		<fieldinfoservicelistassetdefaultservice:FieldinfoservicelistassetdefaultService id="fieldinfoservicelistassetdefaultService"
+																						 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+																						 showBusyCursor="true"/>
+		<s:CallResponder id="getField_infoservicelist_assetdefaultByslistIDResult" result="getField_infoservicelist_assetdefaultByslistIDResult_resultHandler(event)"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:BorderContainer left="0" right="0" top="0" bottom="0" borderVisible="false">
+		<s:HGroup left="5" right="5" top="5" gap="15" verticalAlign="middle">
+			<s:Label height="20" fontSize="10" fontWeight="normal" text="Service Name : " textAlign="left"
+					 verticalAlign="middle"/>
+			<s:Label height="20" color="#000000" fontSize="10" fontStyle="italic" fontWeight="bold"
+					 text="{slistVO.slist_name}" verticalAlign="middle"/>
+			<mx:LinkButton id="lbtnNote" visible="{slistVO.slist_note !== ''}" right="10"
+						   top="5" width="20" height="20" color="#000000" focusColor="#A2CBEA"
+						   fontSize="11" fontWeight="bold"
+						   icon="@Embed(source='../images/script_text.png')" paddingLeft="0"
+						   paddingRight="0" toolTip="{slistVO.slist_note}"/>
+		</s:HGroup>
+		<mx:DataGrid id="dgAssetService" left="5" right="5" top="30" bottom="5" borderVisible="false"
+					 chromeColor="#23AAE2" dataProvider="{arrAssetDefault}" fontFamily="Arial" fontSize="10"
+					 fontWeight="normal" variableRowHeight="true"
+					 verticalGridLineColor="0xFFFFFF">
+			<mx:columns>
+				<mx:DataGridColumn width="200" dataField="tool_name" headerText="Asset Name" textAlign="center"
+								   headerStyleName="centerBold"/>
+				<mx:DataGridColumn width="150" dataField="tool_type" headerText="Type" textAlign="center"
+								   headerStyleName="centerBold"/>
+				<mx:DataGridColumn dataField="tool_note" headerText="Note" textAlign="center"
+								   headerStyleName="centerBold"/>
+			</mx:columns>
+		</mx:DataGrid>
+	</s:BorderContainer>
+</s:TitleWindow>

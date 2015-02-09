@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 
+				   right="10" bottom="5" width="180" height="120" borderColor="#D0D0D0"
+				   borderVisible="true" borderWeight="2" cornerRadius="2"
+				   >
+	<fx:Script>
+		<![CDATA[
+			[Bindable]
+			public var data:Object;
+			public function init():void {
+				
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+		<s:Label left="5" right="50" top="5" fontSize="10" text="{data.sensor_name}" textAlign="center"
+				 verticalAlign="middle"/>
+		<s:Label left="5" right="50" top="30" bottom="30" color="#23AAE2" fontSize="30"
+				 text="85.5" textAlign="center" verticalAlign="middle"/>
+		<s:Label left="5" right="50" bottom="5" fontSize="15" fontWeight="normal" text="°C"
+				 textAlign="center" verticalAlign="middle"/>
+		<s:VGroup right="10" top="10" bottom="10" gap="0" textAlign="center" verticalAlign="middle">
+			<s:RadioButton height="20" chromeColor="#049900"/>
+			<s:RadioButton height="20" chromeColor="#FF0000"/>
+			<s:RadioButton height="20" chromeColor="#049900"/>
+			<s:RadioButton height="20" chromeColor="#049900"/>
+		</s:VGroup>
+</s:BorderContainer>

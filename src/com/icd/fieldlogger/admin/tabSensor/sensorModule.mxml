@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="800" height="600" backgroundColor="#23AAE2" borderVisible="false"
+			   fontSize="11" title="Sensor Setting" close="closeHandler(event)"
+			   >
+	<fx:Script>
+		<![CDATA[
+			import mx.events.CloseEvent;
+			import mx.events.ResizeEvent;
+			import mx.managers.PopUpManager;
+			
+			[Bindable] private var arrSensor:Array = [ 
+				{active:"1", color:"0xFFFFFF", name:"P-Ration", unit:"%", a:'0.1933', b:'-2.33',min:"0",max:"100"}, 
+				{active:"1", color:"0xFF6600", name:"Input2", unit:"mV", a:'0.1933', b:'-2.34',min:"0",max:"100"},
+				{active:"0", color:"0x2FAF2C", name:"Input3", unit:"C", a:'0.1933', b:'-2.35',min:"0",max:"100"},
+				{active:"1", color:"0x66BBBB", name:"Input4", unit:"KV", a:'0.5', b:'-2.36',min:"0",max:"1000"},
+				{active:"1", color:"0xCC3333", name:"Input5", unit:"%", a:'0.1933', b:'-2.33',min:"0",max:"1000"},
+				{active:"0", color:"0x9900FF", name:"InputA", unit:"%", a:'0.1933', b:'-2.33',min:"0",max:"1000"},
+				{active:"0", color:"0xFFFF33", name:"InputB", unit:"%", a:'0.2', b:'-2.33',min:"0",max:"100"},
+				{active:"0", color:"0xFF0033", name:"InputC", unit:"%", a:'0.1933', b:'-2.33',min:"0",max:"100"}];
+			
+			protected function closeHandler(event:CloseEvent):void{
+				PopUpManager.removePopUp(this);
+			}
+	
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:BorderContainer left="5" right="5" top="5" bottom="5" borderVisible="false" cornerRadius="5">
+	<!--	<s:Panel left="5" right="5" top="5" bottom="5" borderVisible="false"
+				 chromeColor="#23AAE2" dropShadowVisible="false">
+			<mx:LinkButton id="lbtnAddSensor" left="10" top="-26" height="20"
+						   label="Add Sensor" color="#000000" fontSize="10"
+						   fontWeight="bold" click="lbtnAddSensor_clickHandler(event)"
+						   icon="@Embed(source='../images/add1.png')"
+						   paddingLeft="5" paddingRight="5"
+						   toolTip="start synchronization"/>-->
+			<mx:DataGrid id="dgReferences" left="5" right="5" top="5" bottom="5" borderVisible="false"
+						 chromeColor="#23AAE2" dataProvider="{arrSensor}" fontFamily="Arial" fontSize="10"
+						 fontWeight="normal" variableRowHeight="true"
+						 verticalGridLineColor="0xFFFFFF">
+				<mx:columns>
+					<mx:DataGridColumn width="50" dataField="" headerText="Active" textAlign="center"
+									   wordWrap="true" headerStyleName="centerBold">
+						<mx:itemRenderer>
+							<fx:Component>
+								<mx:HBox horizontalAlign="center">
+									<mx:LinkButton icon="@Embed(source='../images/tick.png')" width="13" mouseEnabled="false"
+												   visible="{data.active === '1'}"/>
+								</mx:HBox>
+							</fx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn width="50" dataField="" headerText="Color" textAlign="center"
+									   wordWrap="true" headerStyleName="centerBold" editable="false"
+									   itemRenderer="com.icd.fieldlogger.admin.tabSensor.sensorColorPicker"/>
+					<mx:DataGridColumn dataField="name" headerText="Sensor Name" textAlign="center"
+									   wordWrap="true" headerStyleName="centerBold"/>
+					<mx:DataGridColumn width="80" dataField="unit" headerText="Unit" editable="false" textAlign="center"
+									   headerStyleName="centerBold" wordWrap="true"/>
+					<mx:DataGridColumn width="80" dataField="a" headerText="a" editable="false" textAlign="center"
+									   headerStyleName="centerBold" wordWrap="true"/>
+					<mx:DataGridColumn width="80" dataField="b" headerText="b" editable="false" textAlign="center"
+									   headerStyleName="centerBold" wordWrap="true"/>
+					<mx:DataGridColumn width="80" dataField="min" headerText="Min" editable="false" textAlign="center"
+									   headerStyleName="centerBold" wordWrap="true"/>
+					<mx:DataGridColumn width="80" dataField="max" headerText="Max" editable="false" textAlign="center"
+									   headerStyleName="centerBold" wordWrap="true"/>
+					
+				</mx:columns>
+			</mx:DataGrid>
+		<!--</s:Panel>-->
+	</s:BorderContainer>
+	
+</s:TitleWindow>

@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" 
+		  xmlns:flexlib="flexlib.controls.*" 
+		  width="100%" height="100%" xmlns:local="*" 
+		  creationComplete="init(event)"
+		  >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.events.DividerEvent;
+			import mx.events.FlexEvent;
+			import mx.graphics.SolidColor;
+			import mx.graphics.Stroke;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.mxml.HTTPService;
+			import mx.utils.ObjectUtil;
+			
+			private var url:String = 'http://ourproject.dyndns-server.com:8099/&amp';
+			
+			private function getData():void {
+				var req:HTTPService = new HTTPService();
+				req.resultFormat = "text";
+				req.url = url;
+				req.addEventListener(ResultEvent.RESULT, getDataresult);
+				req.send();
+			}
+			
+			protected function getDataresult(event:ResultEvent):void
+			{
+				var data:String = event.result as String;
+				var items:Array = data.split("|");
+				myData.addItem({Month:i, data1:items[0], data2:items[1], data3:items[2], data4:items[3], data5:items[4], data6:items[5], data7:items[6],data8:items[7]} );
+				myData.refresh();	
+				i++;	
+			}
+			
+			[Bindable]
+			private var chartData:ArrayCollection = new ArrayCollection();
+			
+			[Bindable]
+			public var myData:ArrayCollection = new ArrayCollection();
+			
+			private var i:int = 0;
+			public function adddatat():void {
+				var o:Object = {Month:chartData.length, 
+					data1:randomRange(1,9),
+					data2:randomRange(1,9),
+					data3:randomRange(1,9),
+					data4:randomRange(1,9),
+					data5:randomRange(1,9),
+					data6:randomRange(1,9),
+					data7:randomRange(1,9)};
+				chartData.addItem(o);
+				slider.values[1]++;
+				i++;
+				chartData.refresh();
+				updateBoundariesFromSlider();
+			}
+			
+			public function loadData(url:String):void {
+				var req:HTTPService = new HTTPService();
+				req.resultFormat = "text";
+				req.url = url;
+				req.addEventListener(ResultEvent.RESULT, parseData);
+				req.send();
+			}
+			
+			
+			protected function parseData(event:ResultEvent):void
+			{
+				var data:String = event.result as String;
+				var array:Array = data.split("\r");
+				var ac:ArrayCollection = new ArrayCollection();
+				
+				for(i=0; i<array.length; i++) {
+					var items:Array = array[i].split(",");
+					items[0] = items[0].replace("\n",'');
+					//					ac.addItem({Month:i, data1:items[0], data2:items[1], data3:items[2], data4:items[3], data5:items[4], data6:items[5], data7:items[6]});	
+					ac.addItem({Month:i, 
+						data1:randomRange(1,10), 
+						data2:randomRange(1,10), 
+						data3:randomRange(1,10), 
+						data4:randomRange(1,10), 
+						data5:randomRange(1,10), 
+						data6:randomRange(1,10), 
+						data7:randomRange(1,10)} );	
+				}
+				trace('i=',i);
+				chartData = ac;
+				chartData.refresh();
+				myData = new ArrayCollection(chartData.source);
+				myData.refresh();
+				leftBoundary = LEFT_START;
+				rightBoundary = RIGHT_START;
+				updateBoundariesFromSlider();
+			}
+			
+			private function updateBoundariesFromSlider():void
+			{
+				leftBoundary = slider.values[0];
+				rightBoundary = slider.values[1];
+				updateMainData();
+			}
+			
+			private function randomRange(minNum:Number, maxNum:Number):Number 
+			{
+				return (Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum);
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				trace('width=',screen.width);
+				sc.width = screen.width;
+				trace('height=',screen.height);
+				sc.height = screen.height-200;
+			}
+			
+			[Bindable] private var leftBoundary:Number;
+			[Bindable] private var rightBoundary:Number;
+			private var LEFT_START:Number = 15;
+			private var RIGHT_START:Number = 25;
+			[Bindable]
+			public var maxVAxis:Number = 10;
+			
+			/* Some customizable colors for the ara fill and stroke. */
+			[Bindable]
+			public var areaColor:SolidColor = new SolidColor(0x0033CC, 0.5);
+			
+			[Bindable] public var areaStroke:Stroke = new Stroke(0x0033CC, 2);
+			[Embed(source="img/divider.png")] 
+			[Bindable] public var dividerClass:Class;
+			
+			[Embed(source="img/blank.png")] 
+			[Bindable] public var blankDividerClass:Class;
+			
+			/* Two spacer heights, these are used to determine the layout of the
+			* small chart versus the big chart.
+			*/
+			[Bindable] 
+			public var gapBetweenCharts:Number = 0;
+			
+			[Bindable] 
+			public var gapAtBottom:Number = 0;
+			
+			public var mouseXRef:Number;
+			
+			private var staticLeftBoundary:Number;
+			private var staticRightBoundary:Number;
+			
+			private function setMouseDown(theChart:CartesianChart):void
+			{
+				mouseXRef = this.mouseX;
+				staticLeftBoundary = leftBoundary;
+				staticRightBoundary = rightBoundary;
+				//				if(theChart == bigChart ) bigDrag = true;
+				//				if(theChart == smallChart) smallDrag = true;
+				//				this.systemManager.addEventListener(MouseEvent.MOUSE_MOVE, moveChart);
+				//				this.systemManager.addEventListener(MouseEvent.MOUSE_UP, stopDragging);
+			}
+			
+			private function updateBoundariesFromDivider(event:DividerEvent):void
+			{
+				leftBoundary = Math.abs(HDividedBox(event.target).getChildAt(0).width / (event.target.width / chartData.length));
+				rightBoundary = Math.abs(chartData.length - (HDividedBox(event.target).getChildAt(2).width / (event.target.width / chartData.length)));
+				trace(leftBoundary, rightBoundary);
+				updateMainData();
+			}
+			
+			private function updateMainData():void
+			{
+				var ar:Array = chartData.source.slice(leftBoundary, rightBoundary)
+				myData = new ArrayCollection();
+				myData = new ArrayCollection(ar);
+				//				chartData.refresh();
+				//				myData.refresh();
+				//				trace(leftBoundary, rightBoundary,myData.length);
+				//				invalidateDisplayList();
+				//				validateDisplayList();
+				validateNow();
+				//				validateProperties();
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<!--	<s:Button label="loaddata" click="getData()" />-->
+	<mx:VBox verticalGap="0" width="100%" verticalScrollPolicy="off" horizontalAlign="left" height="141" paddingLeft="24" paddingRight="24">
+		
+		<mx:CartesianChart id="smallChart" 
+						   width="100%" height="100"
+						   dataProvider="{chartData}" 
+						   showDataTips="true" >
+			
+			<mx:horizontalAxis>
+				<mx:CategoryAxis id="hhaxis" categoryField="Month"/>
+			</mx:horizontalAxis> 
+			
+			<mx:horizontalAxisRenderers>
+				<mx:AxisRenderer axis="{hhaxis}" visible="false"/>
+			</mx:horizontalAxisRenderers>
+			
+			<mx:verticalAxis>
+				<mx:LinearAxis id="vvaxis" />
+			</mx:verticalAxis>
+			
+			<mx:verticalAxisRenderers>
+				<mx:AxisRenderer axis="{vvaxis}" visible="false"  />
+			</mx:verticalAxisRenderers>
+			
+			<mx:series>
+				<mx:AreaSeries name="data1" yField="data1"  
+							   areaStroke="{areaStroke}" areaFill="{areaColor}" />
+			</mx:series>
+			
+			<mx:annotationElements>
+				<mx:HDividedBox id="overlayCanvas" width="100%" alpha="1" 
+								dividerAffordance="5" liveDragging="true" horizontalGap="10" 
+								verticalGap="0" horizontalScrollPolicy="off" 
+								dividerDrag="updateBoundariesFromDivider(event)" 
+								dividerSkin="{blankDividerClass}"
+								mouseOver="overlayCanvas.setStyle('dividerSkin', dividerClass);" 
+								mouseOut="overlayCanvas.setStyle('dividerSkin', blankDividerClass);"
+								>
+					
+					<mx:Canvas id="leftBox" height="100%" width="{(overlayCanvas.width / chartData.length) * leftBoundary}" 
+							   backgroundAlpha="0.4" borderThickness="1" borderColor="#999999" borderStyle="solid" />
+					<mx:Canvas id="visibleBox" width="100%" height="100%" 
+							   buttonMode="true" mouseDown="setMouseDown(smallChart)"/>
+					<mx:Canvas id="rightBox" height="100%" width="{(overlayCanvas.width / chartData.length) * (chartData.length - rightBoundary)}"
+							   backgroundAlpha="0.4"  borderThickness="1" borderColor="#999999" borderStyle="solid"/>
+				</mx:HDividedBox>
+				
+			</mx:annotationElements>
+			
+		</mx:CartesianChart>
+		<mx:HBox horizontalGap="0" paddingLeft="24">
+			<flexlib:HSlider id="slider" width="{overlayCanvas.width + 12}"  height="25"
+							 trackHighlightSkin="flexlib.skins.SliderThumbHighlightSkin"
+							 
+							 allowTrackClick="true" allowThumbOverlap="false" 
+							 liveDragging="true" change="updateBoundariesFromSlider()"
+							 showDataTip="true" dataTipPlacement="bottom" dataTipOffset="3"
+							 showTrackHighlight="true"
+							 thumbCount="2" snapInterval="1"
+							 values="{[leftBoundary, rightBoundary]}"
+							 minimum="0" maximum="{chartData.length - 1}"
+							 />
+		</mx:HBox>
+	</mx:VBox>
+	<s:Scroller id="sc" horizontalScrollPolicy="off"
+				verticalScrollPolicy="on" >
+		<s:VGroup   width="100%" height="100%">
+			<local:StockChartComponent id="chart1" myData="{myData}" yf="data1" showdata="data1" showy="true" showx="false"/>
+			<local:StockChartComponent myData="{myData}" yf="data2" showdata="data2" showy="true" showx="false"/>
+			<local:StockChartComponent myData="{myData}" yf="data3" showdata="data3" showy="true" showx="false"/>
+			<local:StockChartComponent myData="{myData}" yf="data4" showdata="data4" showy="true" showx="false"/>
+			<local:StockChartComponent myData="{myData}" yf="data5" showdata="data5" showy="true" showx="false"/>
+			<local:StockChartComponent myData="{myData}" yf="data6" showdata="data6" showy="true" showx="false"/>
+			<local:StockChartComponent myData="{myData}" yf="data7" showdata="data7" showy="true" showx="true"/>
+		</s:VGroup>
+	</s:Scroller>
+</s:VGroup>

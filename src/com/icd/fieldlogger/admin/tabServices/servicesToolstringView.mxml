@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:treeservice="services.treeservice.*"
+			   xmlns:fieldinfoserviceservice="services.fieldinfoserviceservice.*"
+			   width="800" height="600" backgroundColor="#23AAE2" borderVisible="false"
+			   close="closeHandler(event)" creationComplete="creationCompleteHandler(event)"
+			   fontSize="11" implements="icd.mgmtview.api.IManagementView"
+			   title="View Tool String Used">
+	<fx:Script>
+		<![CDATA[
+			import com.icd.fieldlogger.admin.tabSensor._sensorViewUsed;
+			
+			import flash.events.Event;
+			
+			import icd.mgmtview.api.constant.ManagementViewConst;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.DragEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.Allinfo_serviceAdvanced;
+			
+			[Bindable] private var serviceVO:Allinfo_serviceAdvanced = new Allinfo_serviceAdvanced;
+			public function onApplicationResize(event:Event):void{}
+			protected function closeHandler(event:CloseEvent):void{
+				PopUpManager.removePopUp(this);
+			}
+			
+			public function prepareview(mode:int, titleName:String, objVO:Object=null):void{
+				serviceVO = objVO as Allinfo_serviceAdvanced;
+			}
+			
+			protected function creationCompleteHandler(event:FlexEvent):void{
+				getAssetsSensorsByserviceIDResult.token = treeService.getAssetsSensorsByserviceID(serviceVO.serviceID);
+			}
+			
+			[Bindable] private var arrayTree:ArrayCollection = new ArrayCollection();
+			protected function getAssetsSensorsByserviceIDResult_resultHandler(event:ResultEvent):void{
+				arrayTree = event.result as ArrayCollection;
+			}
+	
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<treeservice:TreeService id="treeService"
+								 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+								 showBusyCursor="true"/>
+		<s:CallResponder id="getAssetsSensorsByserviceIDResult" result="getAssetsSensorsByserviceIDResult_resultHandler(event)"/>
+
+		
+
+	</fx:Declarations>
+	
+	<s:BorderContainer left="5" right="5" top="5" bottom="5" borderVisible="false" cornerRadius="5">
+		<mx:AdvancedDataGrid id="dgSelectSensor" left="5" right="5" top="40" bottom="5"
+							 borderVisible="false" chromeColor="#23AAE2"
+							 fontFamily="Arial" fontSize="10"
+							 fontWeight="normal" variableRowHeight="true"
+							 verticalGridLineColor="0xFFFFFF"
+							 folderOpenIcon="@Embed(source='../images/toolbox.png')"
+							 folderClosedIcon="@Embed(source='../images/toolbox.png')"
+							 defaultLeafIcon="@Embed(source='../images/wrench.png')"
+							 sortableColumns="false">
+			<mx:dataProvider>
+				<mx:HierarchicalData source="{arrayTree}"/>
+			</mx:dataProvider>
+			<mx:columns>
+				<mx:AdvancedDataGridColumn dataField="tool_name" headerText="Asset Name" textAlign="center"
+										   headerStyleName="centerBold"/>
+				<mx:AdvancedDataGridColumn width="100" dataField="asset_serialNo" headerText="S/N" textAlign="center"
+										   headerStyleName="centerBold"/>
+				<mx:AdvancedDataGridColumn width="150" dataField="sensor_name" headerText="Sensor Name" textAlign="center"
+										   headerStyleName="centerBold"/>
+				<mx:AdvancedDataGridColumn width="50" dataField="sensor_unit" headerText="Unit" textAlign="center"
+										   headerStyleName="centerBold"/>
+				<mx:AdvancedDataGridColumn width="50" dataField="sensor_gain_a" headerText="a" textAlign="center"
+										   headerStyleName="centerBold" />
+				<mx:AdvancedDataGridColumn width="50" dataField="sensor_offset_b" headerText="b" textAlign="center"
+										   headerStyleName="centerBold" />
+				<mx:AdvancedDataGridColumn width="50" dataField="sensor_min" headerText="Min" textAlign="center"
+										   headerStyleName="centerBold" />
+				<mx:AdvancedDataGridColumn width="50" dataField="sensor_max" headerText="Max" textAlign="center"
+										   headerStyleName="centerBold" />
+				<mx:AdvancedDataGridColumn width="60" dataField="ts_sensorColor" headerText="Color" textAlign="center"
+										   headerStyleName="centerBold" 
+										   itemRenderer="com.icd.fieldlogger.admin.tabSensor.sensorColorLabel"/>
+			</mx:columns>
+		</mx:AdvancedDataGrid>    
+		<s:HGroup left="5" right="5" top="10" gap="15" verticalAlign="middle">
+			<s:Label height="20" fontSize="10" fontWeight="normal" paddingLeft="5" paddingRight="5"
+					 text="Service Name : " textAlign="left" verticalAlign="middle"/>
+			<s:Label height="20" color="#000000" fontSize="10" fontStyle="italic" fontWeight="bold"
+					 text="{serviceVO.service_name}" verticalAlign="middle"/>
+			<mx:LinkButton id="lbtnNote" visible="{serviceVO.service_note !== ''}" right="10"
+						   top="5" width="20" height="20" color="#000000" focusColor="#A2CBEA"
+						   fontSize="11" fontWeight="bold"
+						   icon="@Embed(source='../images/script_text.png')" paddingLeft="0"
+						   paddingRight="0" toolTip="{serviceVO.service_note}"/>
+		</s:HGroup>
+		<!--</s:Panel>-->
+	</s:BorderContainer>
+	
+</s:TitleWindow>

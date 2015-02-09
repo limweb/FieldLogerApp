@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:pdqinfoservice="services.pdqinfoservice.*"
+		  xmlns:empinfoservice="services.empinfoservice.*"
+		  width="100%" height="100%"
+		  creationComplete="creationCompleteHandler(event)" fontFamily="Arial" fontSize="10">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.hurlant.crypto.symmetric.CTRMode;
+			import com.icd.fieldlogger.admin.adminSetting;
+			import com.icd.fieldlogger.admin.tabInfo.projectInfoModule;
+			import com.icd.fieldlogger.login.LoginModule;
+			import com.icd.fieldlogger.myHome.realtime.realtimeMainModule;
+			import com.icd.fieldlogger.myHome.report.reportMainModule;
+			
+			import icd.app.constant.ApplicationConstant;
+			import icd.utils.LDAPUtils;
+			
+			import mx.charts.BarChart;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.core.IVisualElement;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ItemClickEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.EmployeeInfo;
+			
+			protected function creationCompleteHandler(event:FlexEvent):void {
+				//getEmp_infoByEmailResult.token = empinfoService.getEmp_infoByEmail(ApplicationConstant.USER.mail);
+				changeMenu(new reportMainModule());
+			}
+			[Bindable] public static var empVO:EmployeeInfo = new EmployeeInfo();
+			protected function getPdq_EmployeebasicInfoResult_resultHandler(event:ResultEvent):void{
+				empVO = event.result as EmployeeInfo;
+			}
+			private function changeMenu(module:Module):void{
+				grpViewPDQ.removeAllElements();
+				grpViewPDQ.addElement(module as IVisualElement);
+			}
+			
+			protected function lb1_itemClickHandler(event:ItemClickEvent):void {
+				var changeModule:Module;
+				var titleName:String;
+				switch(event.index)
+				{
+					case 0:
+					{
+						changeModule = new reportMainModule();
+						break;
+					}	
+				case 1:
+					{
+						changeModule = new realtimeMainModule();
+						break;
+					}
+					/* 	case 2:
+					{
+						changeModule = new datalistModule();
+						break;
+					}
+					case 3:
+					{
+						changeModule = new linechartModule();
+						break;
+					}  
+					case 4:
+					{
+						changeModule = new barchartModule();
+						break;
+					}	 */
+					
+					default:
+					{
+						break;
+					}
+				}
+				changeMenu(changeModule); 
+			}
+		
+			[Bindable] private var cStart:uint = 0xB5B5B5;
+			[Bindable] private var cStop:uint  = 0xB5B5B5;
+			protected function lbtnStart_clickHandler(event:MouseEvent):void{
+				cStart = 0x2FAF2C;
+				cStop  = 0xB5B5B5;
+			}
+			
+			protected function lbtnStop_clickHandler(event:MouseEvent):void{
+				cStart = 0xB5B5B5;
+				cStop  = 0xFF0000;
+			}
+			
+			protected function lbtnAdminSetting_clickHandler(event:MouseEvent):void{
+				var ttwdAdmin:adminSetting = new adminSetting();
+				PopUpManager.addPopUp(ttwdAdmin,this,true);
+				//ttwdAdmin.x = 10;
+				//ttwdAdmin.y = 10;
+				//PopUpManager.centerPopUp(ttwdAdmin);
+				ttwdAdmin.isPopUp = true;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<empinfoservice:EmpinfoService id="empinfoService"
+									   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+									   showBusyCursor="true"/>
+		<s:CallResponder id="getEmp_infoByEmailResult"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:BorderContainer left="10" right="10" top="10" bottom="10" borderVisible="false"
+					   cornerRadius="10" fontFamily="Arial" fontSize="12" horizontalCenter="0"
+					   verticalCenter="0">		
+		<s:Label x="10" y="10" width="600" color="#878787" fontFamily="Arial" fontSize="18"
+				 text="FIELD LOGGER "/>	
+		<s:BorderContainer left="10" right="10" top="35" height="30" borderColor="#23AAE2"
+						   borderWeight="2" cornerRadius="5">
+			<s:HGroup left="5" height="25" gap="6"
+					  verticalCenter="0">
+				<mx:LinkBar id="lb1" left="5" height="25" color="#255C93"
+							dataProvider="{viewStack}"
+							fontFamily="Arial" fontSize="10" fontWeight="bold"
+							itemClick="lb1_itemClickHandler(event)" paddingBottom="0"
+							paddingLeft="10" paddingRight="10" paddingTop="0" verticalAlign="middle">
+				</mx:LinkBar>
+			</s:HGroup>
+			<s:HGroup right="5" gap="5" verticalCenter="0">
+				<s:Label height="20" color="#B2B2B2" fontFamily="Arial" fontSize="10"
+						 fontWeight="bold" paddingLeft="5" paddingRight="5" text="WELCOME :"
+						 textAlign="left" verticalAlign="middle"/>
+				<s:Label height="20" color="#B2B2B2" fontFamily="Arial" fontSize="10"
+						 fontWeight="bold" paddingLeft="5" paddingRight="5" text="{empVO.Ename} ({empVO.business})"
+						 textAlign="center" verticalAlign="middle" toolTip="{ApplicationConstant.USER.userType}"/>
+				
+				<mx:LinkButton id="lbtnAdminSetting" width="35" height="20" visible="{ApplicationConstant.USER.userType = LDAPUtils.TYPE_SUPERADMIN}"
+							   click="lbtnAdminSetting_clickHandler(event)"
+							   fontWeight="normal" icon="@Embed(source='../images/gear_wheel.png')"
+							   paddingLeft="5" paddingRight="5" toolTip="Admin Setting"/>
+				<mx:VRule height="20"/>
+				<mx:LinkButton width="35" height="20"
+							   click="(FlexGlobals.topLevelApplication).changePanel(new LoginModule())"
+							   fontWeight="normal" icon="@Embed(source='../images/door_in.png')"
+							   paddingLeft="5" paddingRight="5" toolTip="Log Out" visible="false"/>
+			</s:HGroup>
+		</s:BorderContainer>		
+		
+		<s:BorderContainer id="grpViewPDQ" left="10" right="10" top="70" bottom="10" borderColor="#23AAE2"
+						   borderWeight="2" cornerRadius="5">
+			<mx:ViewStack id="viewStack" left="0" right="0" top="0" bottom="0">
+				<s:NavigatorContent width="100%" height="100%" label="Project Report"  icon="@Embed(source='../images/report_edit.png')">
+				</s:NavigatorContent>
+				<s:NavigatorContent width="100%" height="100%" label="Real-time Report" icon="@Embed(source='../images/system_monitor.png')">
+				</s:NavigatorContent>
+				<!--<s:NavigatorContent width="100%" height="100%" label="Data List" icon="@Embed(source='../images/table.png')">
+				</s:NavigatorContent>
+				<s:NavigatorContent width="100%" height="100%" label="Line Chart" icon="@Embed(source='../images/linechart.png')">
+				</s:NavigatorContent>
+				<s:NavigatorContent width="100%" height="100%" label="Bar Chart"  icon="@Embed(source='../images/columnchart.png')">
+				</s:NavigatorContent>-->
+				
+			</mx:ViewStack>
+		</s:BorderContainer>
+		
+		</s:BorderContainer>
+	
+</s:Module>

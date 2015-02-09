@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<!-- dpcontrols/adg/SimpleHierarchicalADGTreeColumn.mxml -->
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:fieldinfoservicetoolstringservice="services.fieldinfoservicetoolstringservice.*"
+			   xmlns:treeservice="services.treeservice.*"
+			   creationComplete="application1_creationCompleteHandler(event)">
+	<fx:Style source="dgTree.css"/>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			//include "SimpleHierarchicalData.as";
+			
+			protected function application1_creationCompleteHandler(event:FlexEvent):void{
+				getAssetsSensorsResult.token = treeService.getAssetsSensors();
+				//getAllField_infoservice_toolstringByserviceIDResult.token = fieldinfoservicetoolstringService.getAllField_infoservice_toolstringByserviceID('SV1416981638347');
+			}
+			[Bindable] private var arrToolstring:ArrayCollection = new ArrayCollection();
+			protected function getAllField_infoservice_toolstringByserviceIDResult_resultHandler(event:ResultEvent):void{
+				arrToolstring = event.result as ArrayCollection;
+				
+			}
+			
+			
+			/* protected function getall():void
+			{
+				getallResult.token = treeService.getall();
+			} */
+			[Bindable] private var arrayTree:ArrayCollection = new ArrayCollection();
+			protected function getAssetsSensorsResult_resultHandler(event:ResultEvent):void{
+				arrayTree = event.result as ArrayCollection;
+				//adg.dataProvider = event.result as ArrayCollection;
+			}
+	
+			//creationComplete="getAssetsSensors()"
+			
+		/* 	protected function lblfunctionTool(item:Object, column:AdvancedDataGridColumn):String{
+				if(item.tool){
+					return item.tool.tool_name;
+				} else  {
+					return '';
+				}
+			}
+			protected function lblfunctionSensor(item:Object, column:AdvancedDataGridColumn):String{
+				if(item.sensorinfo){
+					return item.sensorinfo.sensor_name;
+				} else  {
+					return '';
+				}
+			} */
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+	
+		<treeservice:TreeService id="treeService"
+								 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+								 showBusyCursor="true"/>
+		<s:CallResponder id="getAssetsSensorsResult" result="getAssetsSensorsResult_resultHandler(event)"/>
+	</fx:Declarations>
+	<s:BorderContainer width="800" height="600" borderVisible="false">
+	
+		<mx:AdvancedDataGrid left="10" right="10" top="10" bottom="10" borderColor="#23AAE2"
+							 chromeColor="#23AAE2" contentBackgroundColor="#23AAE2" fontSize="10">
+			<mx:dataProvider>
+				<mx:HierarchicalData source="{arrayTree}"/>
+			</mx:dataProvider>
+			<mx:columns>
+	
+				<mx:AdvancedDataGridColumn dataField="tool_name" headerText="Asset Name" textAlign="center"
+										   headerStyleName="centerBold"/>
+				<mx:AdvancedDataGridColumn width="100" dataField="asset_serialNo" headerText="S/N" textAlign="center"
+										   headerStyleName="centerBold"/>
+				<mx:AdvancedDataGridColumn width="150" dataField="sensor_name" headerText="Sensor Name" textAlign="center"
+										   headerStyleName="centerBold"/>
+				<mx:AdvancedDataGridColumn width="50" dataField="sensor_unit" headerText="Unit" textAlign="center"
+								   			headerStyleName="centerBold"/>
+				<mx:AdvancedDataGridColumn width="50" dataField="sensor_gain_a" headerText="a" textAlign="center"
+								   			headerStyleName="centerBold" />
+				<mx:AdvancedDataGridColumn width="50" dataField="sensor_offset_b" headerText="b" textAlign="center"
+								   			headerStyleName="centerBold" />
+				<mx:AdvancedDataGridColumn width="50" dataField="sensor_min" headerText="Min" textAlign="center"
+								   			headerStyleName="centerBold" />
+				<mx:AdvancedDataGridColumn width="50" dataField="sensor_max" headerText="Max" textAlign="center"
+								   			headerStyleName="centerBold" />
+				<mx:AdvancedDataGridColumn width="50" dataField="ts_sensorColor" headerText="Sensor Color" textAlign="center"
+										   headerStyleName="centerBold" 
+										   itemRenderer="com.icd.fieldlogger.admin.tabSensor.sensorColorPicker"/>
+				
+			</mx:columns>
+		</mx:AdvancedDataGrid>    
+		
+	</s:BorderContainer>
+</s:WindowedApplication>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:fieldprojectservice="services.fieldprojectservice.*"
+		  xmlns:fieldreportinfoservice="services.fieldreportinfoservice.*"
+		  xmlns:fieldinfoserviceservice="services.fieldinfoserviceservice.*"
+		  width="100%" height="100%" creationComplete="creationCompleteHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.icd.fieldlogger.myHome.realtime.infomation.realtime_InfoModule;
+			import com.icd.fieldlogger.myHome.report.infomation.report_InfoModule;
+			
+			import flash.sampler.NewObjectSample;
+			
+			import icd.mgmtview.api.constant.ManagementViewConst;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.ObjectUtil;
+			
+			import valueObjects.Allreport_info;
+			import valueObjects.Allreport_infoAdvanced;
+			
+			protected function creationCompleteHandler(event:FlexEvent):void{
+				getAllField_report_infoAdvancedResult.token = fieldreportinfoService.getAllField_report_infoAdvanced('2');
+			}
+			
+			[Bindable] private var arrProject:ArrayCollection = new ArrayCollection();
+			protected function getAllField_report_infoAdvancedResult_resultHandler(event:ResultEvent):void{
+				arrProject = event.result as ArrayCollection;
+			}
+			
+			protected function lbtnAddReport_clickHandler(event:MouseEvent):void{
+				var ttwdProjectEdit:realtime_InfoModule = new realtime_InfoModule();
+				ttwdProjectEdit.prepareview(ManagementViewConst.MODE_ADD, "Create New Project");
+				PopUpManager.addPopUp(ttwdProjectEdit,this,true);
+				ttwdProjectEdit.x = 10;
+				ttwdProjectEdit.y = 10;
+				//PopUpManager.centerPopUp(ttwdRef);
+				ttwdProjectEdit.isPopUp = true;
+				ttwdProjectEdit.addEventListener(CloseEvent.CLOSE, alphaPopupCloseHandler);
+			}
+			
+			public function alertEdit():void{
+				var ttwdProjectEdit:realtime_InfoModule = new realtime_InfoModule();
+				ttwdProjectEdit.prepareview(ManagementViewConst.MODE_EDIT, "Update Project", dgProjece.selectedItem as Allreport_infoAdvanced);
+				PopUpManager.addPopUp(ttwdProjectEdit,this,true);
+				ttwdProjectEdit.x = 10;
+				ttwdProjectEdit.y = 10;
+				//PopUpManager.centerPopUp(ttwdRef);
+				ttwdProjectEdit.isPopUp = true;
+				ttwdProjectEdit.addEventListener(CloseEvent.CLOSE, alphaPopupCloseHandler);
+			}
+			private function alphaPopupCloseHandler(e:CloseEvent):void{
+				getAllField_report_infoAdvancedResult.token = fieldreportinfoService.getAllField_report_infoAdvanced('2');
+			}
+			protected function lbtnRefresh_clickHandler(event:MouseEvent):void{
+				getAllField_report_infoAdvancedResult.token = fieldreportinfoService.getAllField_report_infoAdvanced('2');
+			}
+			public function alertDelete():void{
+				Alert.show("Project Deleted","Completed");
+			}
+			public function alertLocked():void{
+				Alert.show("Only Super Admin and Owner Project can edit this project.","Project Locked");
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<fieldreportinfoservice:FieldreportinfoService id="fieldreportinfoService"
+													   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+													   showBusyCursor="true"/>
+		<s:CallResponder id="getAllField_report_infoAdvancedResult" result="getAllField_report_infoAdvancedResult_resultHandler(event)"/>
+		<s:CallResponder id="getAllField_infoserviceSensorRealtimeResult"/>
+		<fieldinfoserviceservice:FieldinfoserviceService id="fieldinfoserviceService"
+														 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+														 showBusyCursor="true"/>
+
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:BorderContainer left="2" right="2" top="2" bottom="2" borderVisible="false">
+		<s:Scroller left="0" right="0" top="0" bottom="0">
+			<s:Group width="100%" height="100%" chromeColor="#FF9999" fontFamily="Arial" fontSize="10">
+				<s:HGroup left="5" top="5">
+					<mx:LinkButton id="lbtnAddReport" left="10" top="3" height="25" label="Add Project"
+								   click="lbtnAddReport_clickHandler(event)" color="#000000"
+								   fontSize="10" fontWeight="bold"
+								   icon="@Embed(source='../images/add1.png')" paddingLeft="5"
+								   paddingRight="5" toolTip="Click to add project"/>
+					<mx:LinkButton id="lbtnRefresh" width="30" height="25"
+								   click="lbtnRefresh_clickHandler(event)" color="#007C7B"
+								   fontWeight="bold" icon="@Embed(source='../images/refresh.png')"
+								   paddingLeft="5" paddingRight="5" toolTip="Refresh"/>
+				</s:HGroup>
+				<s:HGroup right="5" top="5">
+					<mx:LinkButton width="70" height="25" label="Export" fontSize="10" fontWeight="bold"
+								   icon="@Embed(source='../images/excel-icon.png')" paddingLeft="5"
+								   paddingRight="5" toolTip="start synchronization"/>
+					<mx:LinkButton width="70" height="25" label="Print" fontSize="10" fontWeight="bold"
+								   icon="@Embed(source='../images/printer.png')" paddingLeft="5"
+								   paddingRight="5" toolTip="start synchronization"/>
+				</s:HGroup>
+				<mx:DataGrid id="dgProjece" left="5" right="5" top="35" bottom="5" borderVisible="false"
+							 chromeColor="#23AAE2" dataProvider="{arrProject}" fontFamily="Arial" fontSize="10"
+							 fontWeight="normal" variableRowHeight="true"
+							 verticalGridLineColor="0xFFFFFF">
+					<mx:columns>
+						<mx:DataGridColumn width="45" dataField="" headerText="" textAlign="center"
+										   wordWrap="true" headerStyleName="centerBold">
+							<mx:itemRenderer>
+								<fx:Component>
+									<mx:HBox horizontalAlign="center" verticalAlign="top">
+										<mx:Canvas>
+											<mx:LinkButton icon="@Embed(source='../images/delete.png')" width="16" height="16"
+														   toolTip="Click to delete"  
+														   visible="{data.report_locked !== '1'}" click="outerDocument.alertDelete()"/>
+											<mx:LinkButton icon="@Embed(source='../images/lock.png')" width="16" height="16"
+														   toolTip="Project locked" click="outerDocument.alertLocked()"
+														   visible="{data.report_locked === '1'}"/>
+										</mx:Canvas>
+										<mx:LinkButton icon="@Embed(source='../images/modify12.png')" width="16" height="16"
+													   toolTip="Project locked"  
+													   click="outerDocument.alertEdit();"/>
+									</mx:HBox>
+								</fx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn width="150" dataField="infopro_clientID" headerText="Client" textAlign="center"
+										   wordWrap="true" headerStyleName="centerBold"/>
+						<mx:DataGridColumn width="200" dataField="infopro_name" headerText="Project Name" editable="false" textAlign="center"
+										   headerStyleName="centerBold" wordWrap="true"/>
+						<mx:DataGridColumn width="100" dataField="report_startDate" headerText="Start Date" textAlign="center"
+										   wordWrap="true" headerStyleName="centerBold"/>
+						<mx:DataGridColumn width="100" dataField="report_endDate" headerText="End Date" textAlign="center"
+										   wordWrap="true" headerStyleName="centerBold"/>
+						<mx:DataGridColumn width="150" dataField="slist_name" headerText="Service" textAlign="center"
+										   wordWrap="true" headerStyleName="centerBold"/>
+						<mx:DataGridColumn dataField="report_detail" headerText="Note" textAlign="left"
+										   wordWrap="true" headerStyleName="centerBold"/>
+					</mx:columns>
+				</mx:DataGrid>
+				
+			</s:Group>
+		</s:Scroller>
+	</s:BorderContainer>
+</s:Module>

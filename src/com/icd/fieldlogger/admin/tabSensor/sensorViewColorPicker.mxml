@@ -1,0 +1,61 @@
+
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   xmlns:catalogstampinfoservice="services.catalogstampinfoservice.*"
+		   xmlns:fieldtoolstringsensorservice="services.fieldtoolstringsensorservice.*"
+		   width="100%" chromeColor="#F08080" fontFamily="Arial" fontSize="11"
+		   creationComplete="canvas_creationCompleteHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.icd.fieldlogger.admin.tabServices.toolstringFormEdit;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.DropdownEvent;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.Alltoolstring_sensor;
+			
+			[Bindable] private var sensorColor:uint;
+			protected function canvas_creationCompleteHandler(event:FlexEvent):void{
+				getField_toolstring_sensorByToolstringIDResult.token = fieldtoolstringsensorService.getField_toolstring_sensorByToolstringID(sensorViewUsed.viewsensorVO.toolStringID)
+			}
+			[Bindable] private var arrToolstringSensor:ArrayCollection = new ArrayCollection();
+			protected function getField_toolstring_sensorByToolstringIDResult_resultHandler(event:ResultEvent):void{
+				arrToolstringSensor = event.result as ArrayCollection;
+				for each(var item:Alltoolstring_sensor in arrToolstringSensor){
+					if(item.sensorID === data.sensorID){
+						sensorColor = uint(item.sensorColor);
+						
+					}
+				}
+			}
+			
+			
+			protected function cpSensor_closeHandler(event:DropdownEvent):void{
+				var updateColor:Alltoolstring_sensor = new Alltoolstring_sensor();
+				updateColor.toolstringID			 = toolstringFormEdit.ToolstringVO.toolStringID;
+				updateColor.sensorID				 = data.sensorID;
+				updateColor.sensorColor				 = cpSensor.selectedColor.toString();
+				updateField_toolstring_sensorEditorColumnResult.token = fieldtoolstringsensorService.updateField_toolstring_sensorEditorColumn(updateColor, "sensorColor");
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		
+		<fieldtoolstringsensorservice:FieldtoolstringsensorService id="fieldtoolstringsensorService"
+																   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+																   showBusyCursor="true"/>
+		<s:CallResponder id="updateField_toolstring_sensorEditorColumnResult"/>
+		<s:CallResponder id="getField_toolstring_sensorByToolstringIDResult" result="getField_toolstring_sensorByToolstringIDResult_resultHandler(event)"/>
+		
+		
+	</fx:Declarations>
+	<mx:ColorPicker id="cpSensor" chromeColor="#23AAE2" close="cpSensor_closeHandler(event)" mouseChildren="false"
+					horizontalCenter="0" selectedColor="{sensorColor}" editable="false"/> 
+</mx:Canvas>

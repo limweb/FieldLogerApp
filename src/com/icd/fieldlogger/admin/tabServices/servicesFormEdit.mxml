@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:fieldinfoserviceservice="services.fieldinfoserviceservice.*"
+			   xmlns:fieldinfoassetservice="services.fieldinfoassetservice.*"
+			   xmlns:fieldinfosensorservice="services.fieldinfosensorservice.*"
+			   xmlns:fieldinfoserviceassetservice="services.fieldinfoserviceassetservice.*"
+			   xmlns:treeservice="services.treeservice.*"
+			   width="100%" height="100%" close="closeHandler(event)"
+			   resize="onApplicationResize(event)">
+	<fx:Script>
+		<![CDATA[
+			import icd.mgmtview.api.constant.ManagementViewConst;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.HierarchicalCollectionView;
+			import mx.collections.IHierarchicalCollectionView;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.DragEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.ObjectUtil;
+			
+			import valueObjects.Allinfo_service;
+			import valueObjects.Allinfo_service_asset;
+			import valueObjects.TreeAssetSensor;
+			
+			
+			[Bindable] private var MODE:int;
+			[Bindable] private var titleName:String;
+			[Bindable] private var checkSave:Boolean = true;
+			[Bindable] public static var serviceVO:Allinfo_service = new Allinfo_service();
+			
+			public function onApplicationResize(event:Event):void{
+				this.height = parentApplication.height;
+				this.width  = parentApplication.width;
+			}
+			protected function changeHandler():void{
+				checkSave = false;
+			}
+			protected function closeHandler(event:CloseEvent):void{
+				if(checkSave === true){
+					PopUpManager.removePopUp(this);
+				}else{
+					Alert.show("Click Yes to save your changes", "Please confirm", Alert.YES | Alert.NO, this, AlertSaveClosed, null, Alert.YES);	
+				}
+			}
+			protected function AlertSaveClosed(eventObj:CloseEvent):void {
+				if(eventObj.detail==Alert.YES) {
+					if(txtName.text !== ""){
+						prepareSave();
+					}if(txtName.text === ""){
+						Alert.show('Please select "Name"','Fields with Asterisk (*)');
+					}	
+				}else if(eventObj.detail===Alert.NO) {
+					PopUpManager.removePopUp(this);
+				}
+			}
+			
+			public function prepareview(mode:int, titleName:String, objVO:Object=null):void{
+				this.title = titleName;
+				this.MODE = mode;
+				
+				if(this.MODE === ManagementViewConst.MODE_ADD){
+					serviceVO 					= new Allinfo_service;
+					serviceVO.serviceID			= "SV" + new Date().valueOf().toString(); 
+					serviceVO.service_active	= "1";
+				}else if(this.MODE === ManagementViewConst.MODE_EDIT){
+					serviceVO = objVO as Allinfo_service;
+				}
+				getAllfield_infoservice_assetByIDResult.token = fieldinfoserviceassetService.getAllfield_infoservice_assetByID(serviceVO.serviceID);
+				getAssetTool_SerialNoResult.token = treeService.getAssetTool_SerialNo();
+				getAssetsSensorsByserviceIDResult.token = treeService.getAssetsSensorsByserviceID(serviceVO.serviceID);
+			}
+			
+			/* [Bindable] private var arrToolstring:ArrayCollection = new ArrayCollection();
+			[Bindable] private var checkToolstring:String = "0";
+			protected function getAllfield_infoservice_assetByserviceIDResult_resultHandler(event:ResultEvent):void{
+				arrToolstring = event.result as ArrayCollection;
+				if(arrToolstring.length > 0){
+					checkToolstring = "1";
+				}else{
+					checkToolstring = "0";
+				}
+			} */
+			
+			protected function lbtnSave_clickHandler(event:MouseEvent):void{
+				if(txtName.text !== ""){
+					Alert.show('Please confirm!', 'Confirm Save', Alert.YES | Alert.NO, this, AlerSave, null, Alert.YES);
+				}if(txtName.text === ""){
+					Alert.show('Please select "Name"','Fields with Asterisk (*)');
+				}	
+			}
+			protected function AlerSave(eventObj:CloseEvent):void {
+				if(eventObj.detail==Alert.YES) {
+					prepareSave();
+				}
+			}
+			protected function prepareSave():void{
+				var updateInfoProject:Allinfo_service 	= new Allinfo_service();
+				updateInfoProject.serviceNo				= serviceVO.serviceNo;
+				updateInfoProject.serviceID				= serviceVO.serviceID;
+				updateInfoProject.service_name			= txtName.text;
+				updateInfoProject.service_note			= txtNote.text;
+				//updateInfoProject.service_sensor		= checkToolstring;
+				updateInfoProject.service_active		= chkActive.selected? "1":"0";
+				if(this.MODE === ManagementViewConst.MODE_ADD){
+					createField_infoserviceResult.token = fieldinfoserviceService.createField_infoservice(updateInfoProject);
+				}else if(this.MODE === ManagementViewConst.MODE_EDIT){
+					updateField_infoserviceResult.token = fieldinfoserviceService.updateField_infoservice(updateInfoProject);
+				}
+			}
+			protected function infoserviceResult_resultHandler(event:ResultEvent):void{
+				checkSave = true;
+				this.closeButton.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+			}
+	
+			[Bindable] private var arrAsset:ArrayCollection = new ArrayCollection();
+			protected function getAssetTool_SerialNoResult_resultHandler(event:ResultEvent):void{
+				arrAsset = event.result as ArrayCollection;
+			}
+			
+			[Bindable] private var checkAdg:Boolean = false;
+			protected function dgAsset_itemClickHandler(event:ListEvent):void{
+				if(arrAsset){
+					getField_infosensorListByToolIDResult.token = fieldinfosensorService.getField_infosensorListByToolID(dgAsset.selectedItem.asset_toolID);
+				}
+			}
+			
+			[Bindable] private var arrSensor:ArrayCollection = new ArrayCollection();
+			protected function getField_infosensorListByToolIDResult_resultHandler(event:ResultEvent):void{
+				arrSensor = event.result as ArrayCollection;
+			}
+			
+			[Bindable] private var clickDel:String;
+			public function alertDelete ():void{
+				clickDel = dgSelectSensor.selectedItem.assetID;
+				trace(clickDel);
+				Alert.show("Are you sure?", "Confirm Delete", Alert.YES | Alert.NO, this, clickDelete, null, Alert.YES);
+			}
+			
+			protected function clickDelete(eventObj:CloseEvent):void {
+				if(eventObj.detail==Alert.YES) {
+					deletefield_infoservice_assetByassetIDResult.token = fieldinfoserviceassetService.deletefield_infoservice_assetByassetID(clickDel);
+				}
+			}
+
+			protected function infoservice_assetByassetIDResult_resultHandler(event:ResultEvent):void{
+				getAssetsSensorsByserviceIDResult.token = treeService.getAssetsSensorsByserviceID(serviceVO.serviceID);
+			}
+	
+			[Bindable] private var arrayTree:ArrayCollection = new ArrayCollection();
+			protected function getAssetsSensorsByserviceIDResult_resultHandler(event:ResultEvent):void{
+				arrayTree = event.result as ArrayCollection;
+			}
+
+
+			public function alertAddToolstring ():void{
+				var checkDuplicate:Boolean = false;
+				 for each(var item:TreeAssetSensor in arrayTree){
+					if(item.asset_serialNo === dgAsset.selectedItem.asset_serialNo){
+						Alert.show('This Serial Number is duplicate.','Warning !!!');
+						checkDuplicate = true;
+						break;
+					}
+				}
+				if(!checkDuplicate){
+					var createToolstring:Allinfo_service_asset = new Allinfo_service_asset();
+					createToolstring.toolstring_1					= (arrayTree.length+1).toString();
+					createToolstring.toolstring_serviceID			= serviceVO.serviceID;
+					createToolstring.toolstring_assetID				= dgAsset.selectedItem.assetID;
+					createToolstring.toolstring_serialNo			= dgAsset.selectedItem.asset_serialNo;
+					createfield_infoservice_assetResult.token = fieldinfoserviceassetService.createfield_infoservice_asset(createToolstring);	
+				} 
+			}
+			
+			protected function dgSelectSensor_dragCompleteHandler(event:DragEvent):void{
+				var dataDrop:HierarchicalCollectionView = dgSelectSensor.dataProvider as HierarchicalCollectionView;
+				var updateTree:Allinfo_service_asset = new Allinfo_service_asset();
+				//trace(ObjectUtil.toString(dataDrop));
+			 	
+				  for(var i:int = 0;i<dataDrop.length;i++){
+					 // if(event.currentTarget.dataProvider.treeData[i].tool_name !==""){
+					  trace("loop " + i);
+					  //trace(dataDrop.openNodes[i].tool_name);
+						/*  var j:int = 0;
+						 updateTree.toolstringNo 			= dataDrop.source[i].toolstringNo;
+						 updateTree.toolstring_1		 	= (j+1).toString();
+						 updatefield_infoservice_assetEditorColumnResult.token = fieldinfoserviceassetService.updatefield_infoservice_assetEditorColumn(updateTree, "toolstring_1"); */
+					// } 
+				}     
+			}
+
+			protected function updatefield_infoservice_assetEditorColumnResult_resultHandler(event:ResultEvent):void{
+				getAssetsSensorsByserviceIDResult.token = treeService.getAssetsSensorsByserviceID(serviceVO.serviceID);
+			}
+
+			//[Bindable] private var dataDrop:ArrayCollection = new ArrayCollection();
+			protected function getAllfield_infoservice_assetByIDResult_resultHandler(event:ResultEvent):void{
+				//dataDrop = event.result as ArrayCollection;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<fieldinfoserviceservice:FieldinfoserviceService id="fieldinfoserviceService"
+														 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+														 showBusyCursor="true"/>
+		<s:CallResponder id="createField_infoserviceResult" result="infoserviceResult_resultHandler(event)"/>
+		<s:CallResponder id="updateField_infoserviceResult" result="infoserviceResult_resultHandler(event)"/>
+		
+		<fieldinfoassetservice:FieldinfoassetService id="fieldinfoassetService"
+													 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+													 showBusyCursor="true"/>
+	<!--	<s:CallResponder id="getAllField_infoassetListAdvancedResult" result="getAllField_infoassetListAdvancedResult_resultHandler(event)"/>-->
+		
+		<fieldinfosensorservice:FieldinfosensorService id="fieldinfosensorService"
+													   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+													   showBusyCursor="true"/>
+		<s:CallResponder id="getField_infosensorListByToolIDResult" result="getField_infosensorListByToolIDResult_resultHandler(event)"/>
+		
+		<fieldinfoserviceassetservice:FieldinfoserviceassetService id="fieldinfoserviceassetService"
+																   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+																   showBusyCursor="true"/>
+		<!--<s:CallResponder id="getAllfield_infoservice_assetByserviceIDResult" result="getAllfield_infoservice_assetByserviceIDResult_resultHandler(event)"/>-->
+		<s:CallResponder id="createfield_infoservice_assetResult" result="infoservice_assetByassetIDResult_resultHandler(event)"/>
+		<s:CallResponder id="deletefield_infoservice_assetByassetIDResult" result="infoservice_assetByassetIDResult_resultHandler(event)"/>
+		<s:CallResponder id="updatefield_infoservice_assetEditorColumnResult" result="updatefield_infoservice_assetEditorColumnResult_resultHandler(event)"/>
+		
+		<treeservice:TreeService id="treeService"
+								 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+								 showBusyCursor="true"/>
+		<s:CallResponder id="getAssetsSensorsByserviceIDResult" result="getAssetsSensorsByserviceIDResult_resultHandler(event)"/>
+		<s:CallResponder id="getAssetTool_SerialNoResult" result="getAssetTool_SerialNoResult_resultHandler(event)"/>
+		<s:CallResponder id="getAllfield_infoservice_assetByIDResult" result="getAllfield_infoservice_assetByIDResult_resultHandler(event)"/>
+		
+	</fx:Declarations>
+	<s:BorderContainer left="0" right="0" top="0" bottom="0" borderVisible="false">
+		
+			
+		
+		<s:Label left="10" top="5" height="20" fontSize="11" fontStyle="italic" fontWeight="bold"
+				 text="Services Infomation" textAlign="left" verticalAlign="middle"/>
+		<mx:HRule left="10" top="27" width="150"/>
+		<mx:LinkButton id="lbtnSave" right="10" top="5" width="35" height="20"
+					   click="lbtnSave_clickHandler(event)" color="#000000"
+					   enabled="{checkSave === false}" focusColor="#70B2EE" fontWeight="bold"
+					   icon="@Embed(source='../images/save_before.png')" paddingLeft="0"
+					   paddingRight="0" toolTip="Click to Save"/>
+		<mx:LinkButton id="lbtnSaved" visible="{checkSave === true}" right="10" top="5" width="35"
+					   height="20" color="#000000" focusColor="#A2CBEA" fontSize="11"
+					   fontWeight="bold" icon="@Embed(source='../images/save_after.png')"
+					   paddingLeft="5" paddingRight="5" rollOverColor="#A2CBEA"
+					   selectionColor="#A2CBEA" toolTip="Saved"/>
+		<s:VGroup top="40" horizontalCenter="0">
+			<s:HGroup right="5" top="40" gap="20">
+				<s:VGroup gap="20">
+					<s:Label width="50" height="25" color="#FF0000" fontFamily="Arial" fontSize="10"
+							 fontWeight="bold" text="* Name :" textAlign="right" verticalAlign="middle"/>
+				</s:VGroup>
+				<s:VGroup gap="30">
+					<s:HGroup gap="20">
+						<s:TextInput id="txtName" width="420" height="25" borderColor="#23AAE2"
+									 borderVisible="true" change="changeHandler()" text="{serviceVO.service_name}"/>
+						<s:CheckBox id="chkActive" width="50" height="25" label="Active"
+									change="changeHandler()" fontSize="10" fontWeight="normal"
+									selected="{serviceVO.service_active === '1'}"/>
+					</s:HGroup>
+				</s:VGroup>
+			</s:HGroup>
+			<s:HGroup right="5" top="70" width="37%" gap="20">
+				<s:VGroup gap="20">
+					<s:Label width="50" height="25" fontFamily="Arial" fontSize="10" text="Note :"
+							 textAlign="right" verticalAlign="middle"/>
+				</s:VGroup>
+				<s:VGroup gap="20">
+					<s:HGroup>
+						<s:TextArea id="txtNote" width="490" height="100" borderColor="#23AAE2"
+									borderVisible="true" change="changeHandler()"
+									text="{serviceVO.service_note}" textAlign="left"/>
+					</s:HGroup>
+				</s:VGroup>
+				
+			</s:HGroup>
+		</s:VGroup>
+		
+		<s:Scroller left="5" right="5" top="180" bottom="5">
+			<s:HGroup width="100%" height="100%" chromeColor="#FF9999" fontFamily="Arial" fontSize="10" verticalAlign="middle"> 
+				
+				<s:BorderContainer left="5" top="10" bottom="5" width="40%" height="100%"
+								   borderColor="#23AAE2" borderWeight="2" cornerRadius="2">
+		
+					<mx:AdvancedDataGrid id="dgAsset" left="5" right="5" top="30" bottom="5"
+										 itemClick="dgAsset_itemClickHandler(event)"
+										 borderVisible="false" chromeColor="#23AAE2"
+										 fontFamily="Arial" fontSize="10"
+										 fontWeight="normal" variableRowHeight="true"
+										 verticalGridLineColor="0xFFFFFF"
+										 folderOpenIcon="@Embed(source='../images/calculator_black.png')"
+										 folderClosedIcon="@Embed(source='../images/calculator_black.png')"
+										 defaultLeafIcon="@Embed(source='../images/processor.png')"
+										 sortableColumns="false">
+						<mx:dataProvider>
+							<mx:HierarchicalData source="{arrAsset}"/>
+						</mx:dataProvider>
+						<mx:columns>
+							<mx:AdvancedDataGridColumn dataField="tool_name" headerText="Asset Name" textAlign="center"
+													   headerStyleName="centerBold"/>
+							<mx:AdvancedDataGridColumn width="100" dataField="asset_serialNo" headerText="S/N" textAlign="center"
+													   headerStyleName="centerBold"/>
+							<mx:AdvancedDataGridColumn width="150" dataField="asset_status" headerText="Status" textAlign="center"
+													   headerStyleName="centerBold"/>
+							<mx:AdvancedDataGridColumn width="30" dataField="" headerText="" textAlign="center"
+													   headerStyleName="centerBold">
+								<mx:itemRenderer>
+									<fx:Component>
+										<mx:HBox horizontalAlign="center" verticalAlign="top">
+											<mx:LinkButton icon="@Embed(source='../images/bullet_go.png')"  width="16" height="16"
+														   toolTip="Click to Add Tool String" click="outerDocument.alertAddToolstring()"
+														   visible="{!data.tool_name}"/>
+										</mx:HBox>
+									</fx:Component>
+								</mx:itemRenderer>
+							</mx:AdvancedDataGridColumn>
+						</mx:columns>
+					</mx:AdvancedDataGrid>    
+					<s:Label left="5" right="5" top="5" height="25" backgroundColor="#23AAE2"
+							 color="#000000" fontSize="11" fontWeight="bold" text="Asset Tools"
+							 textAlign="center" verticalAlign="middle"/>
+					
+	
+				</s:BorderContainer>
+					<s:BorderContainer right="5" top="10" bottom="5" width="60%" height="100%"
+									   borderColor="#23AAE2" borderWeight="2" cornerRadius="2">
+						<mx:AdvancedDataGrid id="dgSelectSensor" left="5" right="5" top="30" bottom="5"
+											 borderVisible="false" chromeColor="#23AAE2"
+											 fontFamily="Arial" fontSize="10"
+											 fontWeight="normal" variableRowHeight="true"
+											 verticalGridLineColor="0xFFFFFF"
+											 folderOpenIcon="@Embed(source='../images/toolbox.png')"
+											 folderClosedIcon="@Embed(source='../images/toolbox.png')"
+											 defaultLeafIcon="@Embed(source='../images/wrench.png')"
+											 sortableColumns="false"
+											 dragEnabled="true" dragComplete="dgSelectSensor_dragCompleteHandler(event)"
+											 dragMoveEnabled="true"
+											 dropEnabled="true" >
+							<mx:dataProvider>
+								<mx:HierarchicalData source="{arrayTree}"/>
+							</mx:dataProvider>
+							<mx:columns>
+								
+								<mx:AdvancedDataGridColumn dataField="tool_name" headerText="Asset Name" textAlign="center"
+														   headerStyleName="centerBold"/>
+								<mx:AdvancedDataGridColumn width="100" dataField="asset_serialNo" headerText="S/N" textAlign="center"
+														   headerStyleName="centerBold"/>
+								<mx:AdvancedDataGridColumn width="150" dataField="sensor_name" headerText="Sensor Name" textAlign="center"
+														   headerStyleName="centerBold"/>
+								<mx:AdvancedDataGridColumn width="50" dataField="sensor_unit" headerText="Unit" textAlign="center"
+														   headerStyleName="centerBold"/>
+								<mx:AdvancedDataGridColumn width="50" dataField="sensor_gain_a" headerText="a" textAlign="center"
+														   headerStyleName="centerBold" />
+								<mx:AdvancedDataGridColumn width="50" dataField="sensor_offset_b" headerText="b" textAlign="center"
+														   headerStyleName="centerBold" />
+								<mx:AdvancedDataGridColumn width="50" dataField="sensor_min" headerText="Min" textAlign="center"
+														   headerStyleName="centerBold" />
+								<mx:AdvancedDataGridColumn width="50" dataField="sensor_max" headerText="Max" textAlign="center"
+														   headerStyleName="centerBold" />
+								<mx:AdvancedDataGridColumn width="60" dataField="ts_sensorColor" headerText="Color" textAlign="center"
+														   headerStyleName="centerBold" 
+														   itemRenderer="com.icd.fieldlogger.admin.tabSensor.sensorColorLabel"/>
+								<mx:AdvancedDataGridColumn width="30" dataField="" headerText="" textAlign="center"
+														   headerStyleName="centerBold">
+									<mx:itemRenderer>
+										<fx:Component>
+											<mx:HBox horizontalAlign="center" verticalAlign="top" width="70">
+												<mx:LinkButton id="btnGridDelete" icon="@Embed(source='../images/delete.png')" width="16" height="16"
+															   toolTip="Click to delete" click="outerDocument.alertDelete()" visible="{data.tool_name}"/>
+											</mx:HBox>
+										</fx:Component>
+									</mx:itemRenderer>
+								</mx:AdvancedDataGridColumn>
+								<mx:AdvancedDataGridColumn width="30" dataField="toolstring_1" headerText="No." textAlign="center"
+														   headerStyleName="centerBold"/>
+							</mx:columns>
+						</mx:AdvancedDataGrid>    
+						<s:Label left="5" right="5" top="5" height="25" backgroundColor="#23AAE2"
+								 color="#000000" fontSize="11" fontWeight="bold" text="Tools String"
+								 textAlign="center" verticalAlign="middle"/>
+				
+				</s:BorderContainer>
+			</s:HGroup>
+		</s:Scroller>
+		
+	</s:BorderContainer>
+</s:TitleWindow>

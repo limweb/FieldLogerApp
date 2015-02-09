@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:fieldinfoserviceassetservice="services.fieldinfoserviceassetservice.*"
+			   width="600" height="450" creationComplete="creationCompleteHandler(event)"
+			   close="closeHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.DragEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.Allinfo_service_asset;
+			
+			protected function closeHandler(event:CloseEvent):void{
+				PopUpManager.removePopUp(this);
+			}
+			
+			protected function creationCompleteHandler(event:FlexEvent):void{
+				getAllfield_infoservice_assetByserviceIDResult.token = fieldinfoserviceassetService.getAllfield_infoservice_assetByserviceID(servicesAssetFormEdit.serviceVO.serviceID);
+			}
+			
+			[Bindable] private var arrAssetSwap:ArrayCollection = new ArrayCollection();
+			protected function getAllfield_infoservice_assetByserviceIDResult_resultHandler(event:ResultEvent):void{
+				arrAssetSwap = event.result as ArrayCollection;
+			}
+			
+			protected function dgAssetService_dragCompleteHandler(event:DragEvent):void{
+				var dataDrop:ArrayCollection = dgAssetService.dataProvider as ArrayCollection;
+				var updateTree:Allinfo_service_asset = new Allinfo_service_asset();
+				
+				for(var i:int = 0;i<dataDrop.length;i++){
+					updateTree.toolstringNo 			= dataDrop[i].toolstringNo;
+					updateTree.toolstring_1		 		= (i+1).toString();
+					updatefield_infoservice_assetEditorColumnResult.token = fieldinfoserviceassetService.updatefield_infoservice_assetEditorColumn(updateTree, "toolstring_1"); 
+				}     
+			}
+			
+			protected function updatefield_infoservice_assetEditorColumnResult_resultHandler(event:ResultEvent):void{
+				getAllfield_infoservice_assetByserviceIDResult.token = fieldinfoserviceassetService.getAllfield_infoservice_assetByserviceID(servicesAssetFormEdit.serviceVO.serviceID);
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		
+		<fieldinfoserviceassetservice:FieldinfoserviceassetService id="fieldinfoserviceassetService"
+																   fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+																   showBusyCursor="true"/>
+		<s:CallResponder id="getAllfield_infoservice_assetByserviceIDResult" result="getAllfield_infoservice_assetByserviceIDResult_resultHandler(event)"/>
+		<s:CallResponder id="updatefield_infoservice_assetEditorColumnResult" result="updatefield_infoservice_assetEditorColumnResult_resultHandler(event)"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<mx:DataGrid id="dgAssetService" left="5" right="5" top="5" bottom="5" borderVisible="false"
+				 chromeColor="#23AAE2" dataProvider="{arrAssetSwap}" fontFamily="Arial" fontSize="10"
+				 fontWeight="normal" variableRowHeight="true"
+				 verticalGridLineColor="0xFFFFFF"  dragEnabled="true" 
+				 dragComplete="dgAssetService_dragCompleteHandler(event)"
+				 dragMoveEnabled="true"
+				 dropEnabled="true" >
+		<mx:columns>
+			<mx:DataGridColumn width="50" dataField="toolstring_1" headerText="No." textAlign="center"
+							   headerStyleName="centerBold"/>
+			<mx:DataGridColumn width="200" dataField="tool_name" headerText="Asset Name" textAlign="center"
+							   headerStyleName="centerBold"/>
+			<mx:DataGridColumn width="150" dataField="asset_serialNo" headerText="S/N" textAlign="center"
+							   headerStyleName="centerBold"/>
+			<mx:DataGridColumn dataField="asset_note" headerText="Note" textAlign="center"
+							   headerStyleName="centerBold"/>
+		</mx:columns>
+	</mx:DataGrid>
+</s:TitleWindow>

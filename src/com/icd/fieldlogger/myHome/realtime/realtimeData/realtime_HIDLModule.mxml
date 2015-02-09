@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:fieldinputservice="services.fieldinputservice.*"
+		  xmlns:treeservice="services.treeservice.*"
+		  xmlns:fieldinfoserviceservice="services.fieldinfoserviceservice.*"
+		  width="100%" height="100%" 
+		  creationComplete="creationCompleteHandler(event)" xmlns:components="components.*"
+		  >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.utils.StringUtil;
+			import com.icd.fieldlogger.myHome.realtime.infomation.realtime_InfoModule;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.formatters.DateFormatter;
+			import mx.managers.PopUpManager;
+			import mx.messaging.Producer;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.ObjectUtil;
+			
+			
+			private var t:Timer;
+			private var urlReq:URLRequest;
+			private var urlLdr:URLLoader;
+			private var CurrentDateTime:Date = new Date();
+			
+			[Bindable]
+			public var inputcomponent:ArrayCollection = new ArrayCollection();
+			
+			protected function creationCompleteHandler(event:FlexEvent):void{
+				inputcomponent.removeAll();
+				getAllField_infoserviceSensorRealtimeResult.token = fieldinfoserviceService.getAllField_infoserviceSensorRealtime(realtime_InfoModule.reportVO.sID);
+				/*t = new Timer(1000*5);
+				t.addEventListener(TimerEvent.TIMER, updateTimer);
+				urlReq = new URLRequest("http://ourproject.dyndns-server.com:8099/&");
+				urlLdr = new URLLoader();
+				urlLdr.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
+				urlLdr.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
+				urlLdr.addEventListener(Event.COMPLETE, doEventcomplete);*/
+			}
+			[Bindable] private var arrService:ArrayCollection = new ArrayCollection();
+			protected function getAllField_infoserviceSensorRealtimeResult_resultHandler(event:ResultEvent):void{
+				inputcomponent.removeAll();
+				arrService = event.result as ArrayCollection;
+//				Alert.show(ObjectUtil.toString(arrService));
+				var length:int = 0;
+				var ipi:inputinfo;
+				vgleft.removeAllElements();
+				vgright.removeAllElements();
+				if(arrService.length >= 1 ){
+						( arrService.length < 8 ) ? length = arrService.length : length = 8 
+						for (var i:int = 0; i < length; i++) 
+						{
+							ipi = new inputinfo();
+							ipi.data = arrService[i];
+							ipi.init();
+							inputcomponent.addItem(ipi);
+							vgleft.addElement(ipi);
+						}
+				  if(arrService.length >= 9){
+							ipi = new inputinfo();
+							ipi.init();
+							inputcomponent.addItem(ipi);
+							vgright.addElement(ipi);
+				  }
+				}
+			}
+			
+			
+			
+			
+			/*	protected function doEvent(event:Event):void
+			{
+			Alert.show('Error');
+			lblstatus.text = t.running.toString();
+			}
+			
+			private function updateTimer(evt:TimerEvent):void {
+			urlLdr.load(urlReq);
+			} */
+			
+			
+			
+			
+			protected function rdoInput1A_clickHandler(event:MouseEvent):void{
+				var ttwdAlarm:alarmSetting = new alarmSetting();
+				PopUpManager.addPopUp(ttwdAlarm,this,true);
+				PopUpManager.centerPopUp(ttwdAlarm);
+				ttwdAlarm.isPopUp = true;
+				ttwdAlarm.addEventListener(CloseEvent.CLOSE, alphaPopupCloseHandler);
+			}
+			private function alphaPopupCloseHandler(e:CloseEvent):void{
+//				rdoInput1A.selected = false;
+			}
+			
+			
+			protected function lbtnSelected_clickHandler(event:MouseEvent):void{
+				var count:int = 0;
+				for (var i:int = 0; i < inputcomponent.length; i++) 
+				{
+					if(inputcomponent[i].chk == true) count += 1;
+				}
+				
+				if( count > 0 ){
+					var ttwdSelected:realtimeSelected = new realtimeSelected();
+					ttwdSelected.acInputerselect = inputcomponent;
+					PopUpManager.addPopUp(ttwdSelected,this,true);
+					PopUpManager.centerPopUp(ttwdSelected);
+					ttwdSelected.init();
+					ttwdSelected.isPopUp = true;
+				} else {
+					Alert.show('Please Select item to Show ?','Info');
+				}
+			}
+			
+			//Device
+			/* 	protected function doEventcomplete(event:Event):void
+			{
+			counter.appendText(CurrentDateTimeString() + '  =>' + event.target.data + '\n');					
+			//var inp:Inputlog = new Inputlog();
+			var arc:Array = String(event.target.data).split('|');
+			var createInput:AllField_input = new AllField_input();
+			createInput.input_discription = 'dev1';
+			createInput.input_status = 'system';
+			createInput.input_time = CurrentDateTimeString();
+			createInput.input_1 = arc[0];
+			createInput.input_2 = arc[1];
+			createInput.input_3 = arc[2];
+			createInput.input_4 = arc[3];
+			createInput.input_5 = arc[4];
+			createInput.input_6 = arc[5];
+			createInput.input_7 = arc[6];
+			createInput.input_8 = arc[7];
+			createField_inputResult.token = fieldinputService.createField_input(createInput);
+			lblstatus.text = t.running.toString();
+			}
+			
+			private function CurrentDateTimeString():String
+			{               
+			var CurrentDateTime:Date = new Date();
+			var CurrentDF:DateFormatter = new DateFormatter();
+			CurrentDF.formatString = "YYYY/MM/DD LL:NN:SS"
+			var DateTimeString:String = CurrentDF.format(CurrentDateTime);
+			return DateTimeString;
+			}
+			
+			
+			private function startTimer():void {
+			urlLdr.load(urlReq);
+			t.start();
+			lblstatus.text = t.running.toString();
+			}
+			
+			private function stopTimer():void {
+			t.stop();
+			lblstatus.text = t.running.toString();
+			}
+			
+			protected function createField_inputResult_resultHandler(event:ResultEvent):void
+			{
+			// TODO Auto-generated method stub
+			
+			}
+			*/
+		
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:DateFormatter id="dtf" formatString="YYYY-MM-DD"/>
+		<mx:DateFormatter id="ttf" formatString="LL:NN:SS"/>
+	
+		<fieldinfoserviceservice:FieldinfoserviceService id="fieldinfoserviceService"
+														 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+														 showBusyCursor="true"/>
+		<s:CallResponder id="getAllField_infoserviceSensorRealtimeResult" result="getAllField_infoserviceSensorRealtimeResult_resultHandler(event)"/>
+		
+		<!--	<s:CallResponder id="createField_inputResult" result="createField_inputResult_resultHandler(event)"/>
+		<fieldinputservice:FieldinputService id="fieldinputService"
+		fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+		showBusyCursor="true"/>-->
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:BorderContainer left="2" right="2" top="2" bottom="2" borderVisible="false">
+		
+		<s:Scroller left="0" right="0" top="0" bottom="0">
+			<s:Group width="100%" height="100%" chromeColor="#FF9999" fontFamily="Arial" fontSize="10">
+				<s:HGroup top="65" gap="20" horizontalCenter="0" >
+					<s:VGroup left="20" width="420" gap="15" height="100%">
+					<s:HGroup left="20" width="420" gap="15" verticalAlign="top" height="26">
+							<s:HGroup width="63"> </s:HGroup>
+							<s:HGroup width="20"> </s:HGroup>
+							<s:HGroup height="20" fontWeight="bold" gap="10">
+								<s:Label width="15" height="20" color="#000000" fontFamily="Arial"
+										 fontSize="15" text="H" textAlign="center" verticalAlign="bottom"/>
+								<s:Label width="15" height="20" color="#000000" fontFamily="Arial"
+										 fontSize="15" text="I" textAlign="center" verticalAlign="bottom"/>
+								<s:Label width="15" height="20" color="#000000" fontFamily="Arial"
+										 fontSize="15" text="D" textAlign="center" verticalAlign="bottom"/>
+								<s:Label width="15" height="20" color="#000000" fontFamily="Arial"
+										 fontSize="15" text="L" textAlign="center" verticalAlign="bottom"/>
+							</s:HGroup>
+						    <s:Label width="150" height="20"  />
+						    <s:HGroup width="50" gap="25"> </s:HGroup>
+					</s:HGroup>
+					<s:VGroup left="20" width="420" gap="15" height="100%" id="vgleft">
+						<components:inputinfo />
+						<components:inputinfo />
+						<components:inputinfo />
+						<components:inputinfo />
+						<components:inputinfo />
+						<components:inputinfo />
+						<components:inputinfo />
+						<components:inputinfo />
+					</s:VGroup>
+					</s:VGroup>
+					<s:VGroup right="30" width="420" gap="15" height="33" >
+						
+						<s:VGroup left="20" width="420" gap="15" height="100%">
+						<s:HGroup left="20" width="420" gap="15" verticalAlign="top" height="26">
+							<s:HGroup width="63"> </s:HGroup>
+							<s:HGroup width="20"> </s:HGroup>
+							<s:HGroup height="20" fontWeight="bold" gap="10">
+								<s:Label width="15" height="20" color="#000000" fontFamily="Arial"
+										 fontSize="15" text="H" textAlign="center" verticalAlign="bottom"/>
+								<s:Label width="15" height="20" color="#000000" fontFamily="Arial"
+										 fontSize="15" text="I" textAlign="center" verticalAlign="bottom"/>
+								<s:Label width="15" height="20" color="#000000" fontFamily="Arial"
+										 fontSize="15" text="D" textAlign="center" verticalAlign="bottom"/>
+								<s:Label width="15" height="20" color="#000000" fontFamily="Arial"
+										 fontSize="15" text="L" textAlign="center" verticalAlign="bottom"/>
+							</s:HGroup>
+							<s:Label width="150" height="20"  />
+							<s:HGroup width="50" gap="25"> </s:HGroup>
+						</s:HGroup>
+						
+						<s:VGroup left="20" width="420" gap="15" height="100%" id="vgright">
+							<components:inputinfo />
+							<components:inputinfo />
+							<components:inputinfo />
+							<components:inputinfo />
+							<components:inputinfo />
+							<components:inputinfo />
+							<components:inputinfo />
+							<components:inputinfo />
+						</s:VGroup>
+						</s:VGroup>
+					</s:VGroup>
+					
+				</s:HGroup>
+				<s:HGroup right="5" top="3" height="25">
+					<mx:LinkButton id="lbtnPrint" width="70" height="25" label="Print" fontSize="10" fontWeight="bold"
+								   icon="@Embed(source='../images/printer.png')" paddingLeft="5"
+								   paddingRight="5" toolTip="start synchronization"/>
+					<mx:LinkButton id="lbtnSelected" height="25" label="Show Selected" fontSize="10" fontWeight="bold"
+								   icon="@Embed(source='../images/legend.png')" paddingLeft="5"
+								   paddingRight="5" toolTip="click to view selected"
+								   click="lbtnSelected_clickHandler(event)"/>
+				</s:HGroup>
+				<s:HGroup left="10" top="35" width="200" height="20" gap="30">
+					<s:Label height="20" fontWeight="normal" text="Project : {realtime_InfoModule.pjName}" textAlign="left"
+							 verticalAlign="middle"/>
+					<s:Label height="20" fontWeight="normal" text="Service : {realtime_InfoModule.svName}" textAlign="left"
+							 verticalAlign="middle"/>
+					<s:Label height="20" fontWeight="normal" text="Live Data : {realtime_InfoModule.urlSensor}" textAlign="left"
+							 verticalAlign="middle"/>
+				</s:HGroup>
+				<s:Label x="10" top="3" height="20" fontSize="11" fontWeight="bold"
+						 text="Real-time Data" textAlign="left"
+						 verticalAlign="middle"/>
+				<mx:HRule left="10" top="25" width="120"/>
+			</s:Group>
+		</s:Scroller>
+	</s:BorderContainer>
+	<!--<s:HGroup left="10" bottom="170">
+	<s:Label id="lblstatus" left="10" bottom="160" text=""/>
+	<s:Button label="start" click="startTimer()"/>
+	<s:Button label="pause" click="stopTimer()"/>
+	</s:HGroup>
+	<s:TextArea id="counter" left="10" right="10" bottom="10" height="150" text=""/>-->
+</s:Module>
