@@ -24,14 +24,129 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>bin-debug</name>
+			<type>2</type>
+			<location>C:/ERP/PILOKSERVER/phpserver</location>
+		</link>
+		<link>
 			<name>bin-release</name>
 			<type>2</type>
 			<location>C:/ERP/PILOKSERVER/phpserver/Release Build/FieldLoggerProject</location>
 		</link>
 		<link>
+			<name>services/EmpinfoService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/EmpinfoService.php</location>
+		</link>
+		<link>
+			<name>services/FieldinfoassetService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldinfoassetService.php</location>
+		</link>
+		<link>
+			<name>services/FieldinfoassetsensorService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldinfoassetsensorService.php</location>
+		</link>
+		<link>
+			<name>services/FieldinfoclientService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldinfoclientService.php</location>
+		</link>
+		<link>
+			<name>services/FieldinfoprojectService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldinfoprojectService.php</location>
+		</link>
+		<link>
+			<name>services/FieldinfosensorService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldinfosensorService.php</location>
+		</link>
+		<link>
+			<name>services/FieldinfoserviceService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldinfoserviceService.php</location>
+		</link>
+		<link>
+			<name>services/FieldinfoserviceassetService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldinfoserviceassetService.php</location>
+		</link>
+		<link>
+			<name>services/FieldinfoservicelistService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldinfoservicelistService.php</location>
+		</link>
+		<link>
+			<name>services/FieldinfoservicelistassetdefaultService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldinfoservicelistassetdefaultService.php</location>
+		</link>
+		<link>
+			<name>services/FieldinfotoollistService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldinfotoollistService.php</location>
+		</link>
+		<link>
+			<name>services/FieldinfouserService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldinfouserService.php</location>
+		</link>
+		<link>
+			<name>services/FieldrealtimehidlService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldrealtimehidlService.php</location>
+		</link>
+		<link>
+			<name>services/FieldreportinfoService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldreportinfoService.php</location>
+		</link>
+		<link>
+			<name>services/FieldreportinputService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldreportinputService.php</location>
+		</link>
+		<link>
+			<name>services/FieldreportpersonnalService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldreportpersonnalService.php</location>
+		</link>
+		<link>
+			<name>services/FieldreportreferenceService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldreportreferenceService.php</location>
+		</link>
+		<link>
+			<name>services/FieldreportrepresentativeService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldreportrepresentativeService.php</location>
+		</link>
+		<link>
+			<name>services/FieldtoolstringService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/FieldtoolstringService.php</location>
+		</link>
+		<link>
+			<name>services/ImportExcelService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/ImportExcelService.php</location>
+		</link>
+		<link>
+			<name>services/LDAPService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/LDAPService.php</location>
+		</link>
+		<link>
 			<name>services/RealtimehidlsService.php</name>
 			<type>1</type>
 			<location>C:/ERP/PILOKSERVER/phpserver/services/RealtimehidlsService.php</location>
+		</link>
+		<link>
+			<name>services/TreeService.php</name>
+			<type>1</type>
+			<location>C:/ERP/PILOKSERVER/phpserver/services/TreeService.php</location>
 		</link>
 	</linkedResources>
 </projectDescription>

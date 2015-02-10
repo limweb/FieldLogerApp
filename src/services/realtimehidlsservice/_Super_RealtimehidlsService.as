@@ -53,7 +53,7 @@ internal class _Super_RealtimehidlsService extends com.adobe.fiber.services.wrap
         _serviceControl.operations = operations;
         _serviceControl.convertResultHandler = com.adobe.serializers.utility.TypeUtility.convertResultHandler;
         _serviceControl.source = "RealtimehidlsService";
-        _serviceControl.endpoint = "http://127.0.0.1:8000/FieldloggerApp/gateway.php";
+        _serviceControl.endpoint = "http://127.0.0.1:8000//gateway.php";
 
 
          preInitializeService();
