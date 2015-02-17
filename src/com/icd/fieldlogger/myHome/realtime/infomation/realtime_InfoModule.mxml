@@ -18,7 +18,8 @@
 			   xmlns:fieldinfoprojectservice="services.fieldinfoprojectservice.*"
 			   xmlns:fieldinfoserviceservice="services.fieldinfoserviceservice.*"
 			   xmlns:fieldinfoservicelistservice="services.fieldinfoservicelistservice.*"
-			   width="100%" height="100%" borderVisible="true" close="closeHandler(event)"
+			   width="100%" height="100%" borderVisible="true" 
+			   close="closeHandler(event)"
 			   contentBackgroundColor="#FFFFFF" fontSize="11"
 			   implements="icd.mgmtview.api.IManagementView" resize="resizeHandler(event)"
 			   title="{titleName}"
@@ -125,14 +126,6 @@
 				}
 				svName = ddlServiceName.selectedItem.slist_name;
 			}
-			
-			protected function closeHandler(event:CloseEvent):void{
-				Realtime.getInstance().removetimer();
-				PopUpManager.removePopUp(this);
-			}
-			
-			
-			
 			
 			protected function resizeHandler(event:ResizeEvent):void{
 				this.height = parentApplication.height-20;
@@ -489,6 +482,12 @@
 				fieldinfoserviceService.getAllField_infoserviceSensorRealtime(realtime_InfoModule.reportVO.sID);
 			}
 			
+			
+			protected function closeHandler(event:CloseEvent):void
+			{
+					Realtime.getInstance().removetimer();
+					PopUpManager.removePopUp(this);
+			}
 			
 		]]>
 	</fx:Script>
