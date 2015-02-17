@@ -3,13 +3,19 @@
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   width="400" height="300" backgroundColor="#FFFFFF" borderVisible="true"
-			   fontSize="11" title="Selected Input" close="titlewindow1_closeHandler(event)" xmlns:components="components.*">
+			   fontSize="11" title="Selected Input" 
+			   close="titlewindow1_closeHandler(event)" 
+			   xmlns:components="components.*"
+			   >
 	<fx:Script>
 		<![CDATA[
+			import com.icd.fieldlogger.myHome.realtime.infomation.RealtimeEvent;
+			
 			import components.inputinfo;
 			
 			import mx.collections.ArrayCollection;
 			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
 			
 			public var acInputerselect:ArrayCollection = new ArrayCollection();

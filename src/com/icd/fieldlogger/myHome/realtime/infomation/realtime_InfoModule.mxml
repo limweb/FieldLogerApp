@@ -127,6 +127,7 @@
 			}
 			
 			protected function closeHandler(event:CloseEvent):void{
+				Realtime.getInstance().removetimer();
 				PopUpManager.removePopUp(this);
 			}
 			
@@ -147,11 +148,13 @@
 				if(tbdatalist == null){
 					tbdatalist = new realtime_DatalistModule();
 					tbdatalist.init();
-					tbdatalist.start();
+//					tbdatalist.start();
 				} else {
 					tbdatalist.init();
-					tbdatalist.start();
+//					tbdatalist.start();
 				}
+				Realtime.getInstance().url = realtime_InfoModule.urlSensor;
+				Realtime.getInstance().start();
 			}
 			
 			protected function AlertDataRecord(eventObj:CloseEvent):void {
@@ -162,7 +165,8 @@
 			protected function lbtnStop_clickHandler(event:MouseEvent):void{
 				cStart = 0xB5B5B5;
 				cStop  = 0xFF0000;
-				tbdatalist.stop();
+//				tbdatalist.stop();
+				Realtime.getInstance().stop();
 			}
 			
 			
@@ -484,6 +488,7 @@
 			{
 				fieldinfoserviceService.getAllField_infoserviceSensorRealtime(realtime_InfoModule.reportVO.sID);
 			}
+			
 			
 		]]>
 	</fx:Script>
@@ -843,6 +848,7 @@
 										 text="Project Infomation" textAlign="left"
 										 verticalAlign="middle"/>
 								<mx:HRule left="10" top="25" width="120"/>
+								<s:NumericStepper x="134" y="1" maximum="100" minimum="0" value="@{Realtime.getInstance().sec}"/>
 							</s:Group>
 						</s:Scroller>
 					</s:BorderContainer>

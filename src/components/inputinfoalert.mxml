@@ -4,14 +4,66 @@
 				   xmlns:mx="library://ns.adobe.com/flex/mx" 
 				   right="10" bottom="5" width="180" height="120" borderColor="#D0D0D0"
 				   borderVisible="true" borderWeight="2" cornerRadius="2"
+				   creationComplete="initCreatedComplete(event)"
 				   >
 	<fx:Script>
 		<![CDATA[
+			import com.icd.fieldlogger.myHome.realtime.infomation.RealtimeEvent;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			[Embed(source = "../images/circle_red_1.png")]
+			private static var redpic:Class;
+			
+			[Bindable]
+			[Embed(source = "../images/circle_green_1.png")]
+			private static var greepic:Class;
+			
+			
+			
 			[Bindable]
 			public var data:Object;
 			public function init():void {
+				lbH.setStyle('icon',redpic);
+				lbD.setStyle('icon',redpic);
+				lbI.setStyle('icon',redpic);
+				lbL.setStyle('icon',redpic);
+			}
+			
+			protected function initCreatedComplete(event:FlexEvent):void
+			{
+				this.systemManager.addEventListener(RealtimeEvent.REALTIMEEVENT, myEventHandler);
+			}
+			
+			private var test:int = 0;
+			private function myEventHandler(event:RealtimeEvent):void
+			{
+				trace('Event Realtime in Input infoalert');				
+				if(test == 0 ){
+					lbH.setStyle('icon',greepic);
+					lbD.setStyle('icon',redpic);
+					lbI.setStyle('icon',greepic);
+					lbL.setStyle('icon',redpic);
+					test = 1;
+				} else {
+					lbH.setStyle('icon',redpic);
+					lbD.setStyle('icon',greepic);
+					lbI.setStyle('icon',redpic);
+					lbL.setStyle('icon',greepic);
+					test = 0;
+				}
+				
+				validateDisplayList();
+			}
+			
+			
+			protected function bordercontainer1_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
 				
 			}
+			
 		]]>
 	</fx:Script>
 	<fx:Declarations>
@@ -24,9 +76,17 @@
 		<s:Label left="5" right="50" bottom="5" fontSize="15" fontWeight="normal" text="°C"
 				 textAlign="center" verticalAlign="middle"/>
 		<s:VGroup right="10" top="10" bottom="10" gap="0" textAlign="center" verticalAlign="middle">
-			<s:RadioButton height="20" chromeColor="#049900"/>
-			<s:RadioButton height="20" chromeColor="#FF0000"/>
-			<s:RadioButton height="20" chromeColor="#049900"/>
-			<s:RadioButton height="20" chromeColor="#049900"/>
+			<mx:LinkButton id="lbH" width="20" height="20" fontSize="10" fontWeight="bold"
+						    paddingLeft="5"
+						   paddingRight="5" mouseEnabled="false"/>
+			<mx:LinkButton id="lbI" width="20" height="20" fontSize="10" fontWeight="bold"
+						   paddingLeft="5"
+						   paddingRight="5" mouseEnabled="false"/>
+			<mx:LinkButton id="lbD" width="20" height="20" fontSize="10" fontWeight="bold"
+						   paddingLeft="5"
+						   paddingRight="5" mouseEnabled="false"/>
+			<mx:LinkButton id="lbL" width="20" height="20" fontSize="10" fontWeight="bold"
+						   paddingLeft="5"
+						   paddingRight="5" mouseEnabled="false"/>
 		</s:VGroup>
 </s:BorderContainer>
