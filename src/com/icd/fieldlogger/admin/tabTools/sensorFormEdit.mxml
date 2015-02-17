@@ -41,7 +41,7 @@
 			}
 			protected function AlertSaveClosed(eventObj:CloseEvent):void {
 				if(eventObj.detail==Alert.YES) {
-					if(txtName.text !== "" && ddlType.selectedIndex !== -1 && cboUnit.textInput.text !== ""){
+					if(txtName.text !== "" && ddlType.selectedIndex !== -1 && cboUnit.textInput.text !== "" && txtGain_a.text !== "" && txtOffset_b.text !== ""){
 						prepareSave();
 					}if(txtName.text === ""){
 						Alert.show('Please select "Name"','Fields with Asterisk (*)');
@@ -49,7 +49,11 @@
 						Alert.show('Please select "Type"','Fields with Asterisk (*)');
 					}if(cboUnit.textInput.text === ""){
 						Alert.show('Please select "Unit"','Fields with Asterisk (*)');
-					}	
+					}if(txtGain_a.text === ""){
+						Alert.show('Please Insert "Gain(a)"','Fields with Asterisk (*)');
+					}if(txtOffset_b.text === ""){
+						Alert.show('Please select "Offset(b)"','Fields with Asterisk (*)');
+					}
 				}else if(eventObj.detail===Alert.NO) {
 					PopUpManager.removePopUp(this);
 				}
@@ -61,6 +65,8 @@
 				if(this.MODE === ManagementViewConst.MODE_ADD){
 					sensorVO							= new Allinfo_sensor();
 					sensorVO.sensorID					= "SS" + new Date().valueOf().toString();
+					sensorVO.sensor_gain_a				= "1";
+					sensorVO.sensor_offset_b			= "0";
 				}else if(this.MODE === ManagementViewConst.MODE_EDIT){
 					sensorVO = objVO as Allinfo_sensor;
 				}
@@ -68,7 +74,7 @@
 			}
 			
 			protected function lbtnSave_clickHandler(event:MouseEvent):void{
-				if(txtName.text !== "" && ddlType.selectedIndex !== -1 && cboUnit.textInput.text !== ""){
+				if(txtName.text !== "" && ddlType.selectedIndex !== -1 && cboUnit.textInput.text !== "" && txtGain_a.text !== "" && txtOffset_b.text !== ""){
 					Alert.show('Please confirm!', 'Confirm Save', Alert.YES | Alert.NO, this, AlerSave, null, Alert.YES);
 				}if(txtName.text === ""){
 					Alert.show('Please select "Name"','Fields with Asterisk (*)');
@@ -76,6 +82,10 @@
 					Alert.show('Please select "Type"','Fields with Asterisk (*)');
 				}if(cboUnit.textInput.text === ""){
 					Alert.show('Please select "Unit"','Fields with Asterisk (*)');
+				}if(txtGain_a.text === ""){
+					Alert.show('Please Insert "Gain(a)"','Fields with Asterisk (*)');
+				}if(txtOffset_b.text === ""){
+					Alert.show('Please select "Offset(b)"','Fields with Asterisk (*)');
 				}
 				
 			}
@@ -134,10 +144,12 @@
 						 fontWeight="bold" text="* Type :" textAlign="right" verticalAlign="middle"/>
 				<s:Label width="60" height="25" color="#FF0000" fontFamily="Arial" fontSize="10"
 						 fontWeight="bold" text="* Unit :" textAlign="right" verticalAlign="middle"/>
-				<s:Label width="60" height="25" fontFamily="Arial" fontSize="10" text="Gain (a) :"
-						 textAlign="right" verticalAlign="middle"/>
-				<s:Label width="60" height="25" fontFamily="Arial" fontSize="10"
-						 text="Offset (b) :" textAlign="right" verticalAlign="middle"/>
+				<s:Label width="60" height="25" color="#FF0000" fontFamily="Arial" fontSize="10"
+						 fontWeight="bold" text="Gain (a) :" textAlign="right"
+						 verticalAlign="middle"/>
+				<s:Label width="60" height="25" color="#FF0000" fontFamily="Arial" fontSize="10"
+						 fontWeight="bold" text="Offset (b) :" textAlign="right"
+						 verticalAlign="middle"/>
 				<s:Label width="60" height="25" fontFamily="Arial" fontSize="10" text="Min/Max :"
 						 textAlign="right" verticalAlign="middle"/>
 				<s:Label width="60" height="25" fontFamily="Arial" fontSize="10" text="Note :"
@@ -166,16 +178,18 @@
 					<s:AsyncListView list="{getAllsensor_unitResult.lastResult}"/>
 				</s:ComboBox>
 				<s:TextInput id="txtGain_a" width="350" height="25" borderColor="#23AAE2"
-							 borderVisible="true" change="changeHandler()" text="{sensorVO.sensor_gain_a}"/>
+							 borderVisible="true" change="changeHandler()" text="{sensorVO.sensor_gain_a}"
+							 restrict="0-9."/>
 				<s:TextInput id="txtOffset_b" width="350" height="25" borderColor="#23AAE2"
-							 borderVisible="true" change="changeHandler()" text="{sensorVO.sensor_offset_b}"/>
+							 borderVisible="true" change="changeHandler()" text="{sensorVO.sensor_offset_b}"
+							 restrict="0-9."/>
 				<s:HGroup gap="10">
-					<s:TextInput id="txtMin" width="170" height="25" borderColor="#23AAE2"
+					<s:TextInput id="txtMin" width="170" height="25" borderColor="#23AAE2" restrict="0-9."
 								 borderVisible="true" change="changeHandler()" text="{sensorVO.sensor_min}"/>
 					<s:TextInput id="txtMax" width="170" height="25" borderColor="#23AAE2"
 								 borderVisible="true" change="changeHandler()" text="{sensorVO.sensor_max}"/>
 				</s:HGroup>
-				<s:TextArea id="txtNote" width="350" height="70" borderColor="#23AAE2"
+				<s:TextArea id="txtNote" width="350" height="70" borderColor="#23AAE2" restrict="0-9."
 							borderVisible="true"  change="changeHandler()" text="{sensorVO.sensor_note}"/>
 			</s:VGroup>
 			

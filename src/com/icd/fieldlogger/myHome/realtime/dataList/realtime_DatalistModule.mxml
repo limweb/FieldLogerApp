@@ -3,16 +3,12 @@
 		  xmlns:s="library://ns.adobe.com/flex/spark"
 		  xmlns:mx="library://ns.adobe.com/flex/mx"
 		  xmlns:fieldinputservice="services.fieldinputservice.*"
-		  width="100%" height="100%" 
-		  xmlns:fieldreportinputservice="services.fieldreportinputservice.*"
-		  creationComplete="ceratecomplete(event)"
-		  >
+		  width="100%" height="100%" creationComplete="creationCompleteHandler(event)"
+		  xmlns:fieldreportinputservice="services.fieldreportinputservice.*" xmlns:fieldinfoserviceservice="services.fieldinfoserviceservice.*">
 	<fx:Script>
 		<![CDATA[
-			import com.icd.fieldlogger.myHome.realtime.infomation.RealtimeEvent;
-			import com.icd.fieldlogger.myHome.realtime.infomation.Realtime;
+
 			import com.icd.fieldlogger.myHome.realtime.infomation.realtime_InfoModule;
-			import com.icd.fieldlogger.myHome.report.infomation.report_InfoModule;
 			
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
@@ -26,126 +22,132 @@
 			import valueObjects.Allreport_input;
 			
 			
-//			private var t:Timer;
-//			private var urlReq:URLRequest;
-//			private var urlLdr:URLLoader;
+			private var t:Timer;
+			private var urlReq:URLRequest;
+			private var urlLdr:URLLoader;
 			private var CurrentDateTime:Date = new Date();
 			
 			protected function creationCompleteHandler(event:FlexEvent):void{
 				trace('start Timer');
-				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(report_InfoModule.reportVO.reportID);
-//				t = new Timer(1000*5);
-//				t.addEventListener(TimerEvent.TIMER, updateTimer);
-//				urlReq = new URLRequest(realtime_InfoModule.urlSensor); // from database 
-//				urlLdr = new URLLoader();
-//				urlLdr.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
-//				urlLdr.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
-//				urlLdr.addEventListener(Event.COMPLETE, doEventcomplete); 
+				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(realtime_InfoModule.reportVO.reportID);
+				getAllField_infoserviceSensorRealtimeResult.token = fieldinfoserviceService.getAllField_infoserviceSensorRealtime(realtime_InfoModule.reportVO.sID);
+				t = new Timer(1000*5);
+				t.addEventListener(TimerEvent.TIMER, updateTimer);
+				urlReq = new URLRequest(realtime_InfoModule.urlSensor); // from database 
+				urlLdr = new URLLoader();
+				urlLdr.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
+				urlLdr.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
+				urlLdr.addEventListener(Event.COMPLETE, doEventcomplete); 
 			}
 			
 			public function init():void {
-
-				
-				trace('start Timer in realtime datalist module');
-				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(report_InfoModule.reportVO.reportID);
-				Realtime.getInstance().url = realtime_InfoModule.urlSensor;
-//				t = new Timer(1000*5);
-//				t.addEventListener(TimerEvent.TIMER, updateTimer);
-//				urlReq = new URLRequest(realtime_InfoModule.urlSensor); // from database 
-//				urlLdr = new URLLoader();
-//				urlLdr.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
-//				urlLdr.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
-//				urlLdr.addEventListener(Event.COMPLETE, doEventcomplete); 
+				trace('start Timer');
+				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(realtime_InfoModule.reportVO.reportID);
+				getAllField_infoserviceSensorRealtimeResult.token = fieldinfoserviceService.getAllField_infoserviceSensorRealtime(realtime_InfoModule.reportVO.sID);
+				t = new Timer(1000*5);
+				t.addEventListener(TimerEvent.TIMER, updateTimer);
+				urlReq = new URLRequest(realtime_InfoModule.urlSensor); // from database 
+				urlLdr = new URLLoader();
+				urlLdr.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
+				urlLdr.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
+				urlLdr.addEventListener(Event.COMPLETE, doEventcomplete); 
 			}
 			
-//			[Bindable] private var arrDataList:ArrayCollection = new ArrayCollection();
+			[Bindable] private var arrDataList:ArrayCollection = new ArrayCollection();
 			protected function getField_inputByreportIDResult_resultHandler(event:ResultEvent):void{
-//				arrDataList = event.result as ArrayCollection;
-				trace('add arrDatalist');
-				Realtime.getInstance().arrDataList = event.result as ArrayCollection;
-				Realtime.getInstance().arrDataList.refresh();
+				arrDataList = event.result as ArrayCollection;
+			}
+			[Bindable] private var arrs:ArrayCollection = new ArrayCollection();
+			protected function getAllField_infoserviceSensorRealtimeResult_resultHandler(event:ResultEvent):void{
+				arrs = event.result as ArrayCollection;
 			}
 			
 			private function updateTimer(evt:TimerEvent):void {
-//				urlLdr.load(urlReq);
+				urlLdr.load(urlReq);
 			}
 			
 			protected function doEvent(event:Event):void{
 				Alert.show('Error');
-				lblstatus.text = Realtime.getInstance().lblstatus;
+				lblstatus.text = t.running.toString();
 			}
 			
-		
+			protected function doEventcomplete(event:Event):void
+			{
+				//counter.appendText(CurrentDateTimeString() + '  =>' + event.target.data + '\n');					
+				//var inp:Inputlog = new Inputlog();
+				var arc:Array = String(event.target.data).split('|');
+				
+				trace(ObjectUtil.toString(arrs));
+				var createInput:Allreport_input = new Allreport_input();
+				
+				createInput.inputID 	= "INP" + new Date().valueOf().toString();
+				createInput.fieldID 	= realtime_InfoModule.reportVO.reportID;
+				createInput.input_date 	= dtf.format(new Date());
+				createInput.input_time 	= ttf.format(new Date());
+				createInput.input_1 	= (arc[0] && arrs[0].sensorNo)?(arrs[0].sensor_gain_a*arc[0])+arrs[0].sensor_offset_b:'0.00';
+				createInput.input_2 	= (arc[1] && arrs[1].sensorNo)?(arrs[1].sensor_gain_a*arc[1])+arrs[1].sensor_offset_b:'0.00';
+				createInput.input_3 	= (arc[2] && arrs[2].sensorNo)?(arrs[2].sensor_gain_a*arc[2])+arrs[2].sensor_offset_b:'0.00';
+				createInput.input_4 	= (arc[3] && arrs[3].sensorNo)?(arrs[3].sensor_gain_a*arc[3])+arrs[3].sensor_offset_b:'0.00';
+				createInput.input_5 	= (arc[4] && arrs[4].sensorNo)?(arrs[4].sensor_gain_a*arc[4])+arrs[4].sensor_offset_b:'0.00';
+				createInput.input_6 	= (arc[5] && arrs[5].sensorNo)?(arrs[5].sensor_gain_a*arc[5])+arrs[5].sensor_offset_b:'0.00';
+				createInput.input_7 	= (arc[6] && arrs[6].sensorNo)?(arrs[6].sensor_gain_a*arc[6])+arrs[6].sensor_offset_b:'0.00';
+				createInput.input_8 	= (arc[7] && arrs[7].sensorNo)?(arrs[7].sensor_gain_a*arc[7])+arrs[7].sensor_offset_b:'0.00';
+				createInput.input_9 	= (arc[8] && arrs[8].sensorNo)?(arrs[8].sensor_gain_a*arc[8])+arrs[8].sensor_offset_b:'0.00';
+				createInput.input_10 	= (arc[9] && arrs[9].sensorNo)?(arrs[9].sensor_gain_a*arc[9])+arrs[9].sensor_offset_b:'0.00';
+				createInput.input_11 	= (arc[10] && arrs[10].sensorNo)?(arrs[10].sensor_gain_a*arc[10])+arrs[10].sensor_offset_b:'0.00';
+				createInput.input_12	= (arc[11] && arrs[11].sensorNo)?(arrs[11].sensor_gain_a*arc[11])+arrs[11].sensor_offset_b:'0.00';
+				createInput.input_13 	= (arc[12] && arrs[12].sensorNo)?(arrs[12].sensor_gain_a*arc[12])+arrs[12].sensor_offset_b:'0.00';
+				createInput.input_14 	= (arc[13] && arrs[13].sensorNo)?(arrs[13].sensor_gain_a*arc[13])+arrs[13].sensor_offset_b:'0.00';
+				createInput.input_15 	= (arc[14] && arrs[14].sensorNo)?(arrs[14].sensor_gain_a*arc[14])+arrs[14].sensor_offset_b:'0.00';
+				createInput.input_16 	= (arc[15] && arrs[15].sensorNo)?(arrs[15].sensor_gain_a*arc[15])+arrs[15].sensor_offset_b:'0.00';
+				createField_inputResult.token = fieldinputService.createField_input(createInput);
+				lblstatus.text = t.running.toString();
+				//trace(ObjectUtil.toString(createInput));
+				arrDataList.addItemAt(createInput,0);
+			}
+			
+			protected function linkbutton1_clickHandler(event:MouseEvent):void{
+				/* var ttwdImport:importExcel = new importExcel();
+				PopUpManager.addPopUp(ttwdImport, this, true);
+				PopUpManager.centerPopUp(ttwdImport);
+				ttwdImport.addEventListener(CloseEvent.CLOSE, alphaPopupCloseHandler); */
+			}
 			private function alphaPopupCloseHandler(e:CloseEvent):void{
-				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(report_InfoModule.reportVO.reportID);
+				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(realtime_InfoModule.reportVO.reportID);
 			}
 			
 			
 			protected function lbtnRefresh_clickHandler(event:MouseEvent):void{
-				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(report_InfoModule.reportVO.reportID);
+				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(realtime_InfoModule.reportVO.reportID);
 			}
 			
 			
 			public function start():void
 			{
-				Realtime.getInstance().sec = 5;
-				Realtime.getInstance().start();
-				lblstatus.text = Realtime.getInstance().lblstatus;
+				trace('start');
+				urlLdr.load(urlReq);
+				if( t.running){
+					t.stop();
+					t.removeEventListener(TimerEvent.TIMER, updateTimer);
+				}
+				var i:int = 5*1000;  // 5 sec
+				t = new Timer(i);
+				t.addEventListener(TimerEvent.TIMER, updateTimer);
+				t.start();
+				lblstatus.text = t.running.toString();
 			}
 			
 			public function stop():void
 			{
 				trace('stop');
-				Realtime.getInstance().stop();
-				lblstatus.text = Realtime.getInstance().lblstatus;
-
+				t.stop();
+				lblstatus.text = t.running.toString();
 			}
 			
 			
 			protected function createField_inputResult_faultHandler(event:FaultEvent):void
 			{
 				stop();
-			}
-			
-			protected function ceratecomplete(event:FlexEvent):void
-			{
-				trace('addevent listener');
-				this.systemManager.addEventListener(RealtimeEvent.REALTIMEEVENT, myEventHandler);
-				trace('start Timer');
-				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(report_InfoModule.reportVO.reportID);
-			}
-			
-			protected function myEventHandler(event:RealtimeEvent):void
-			{
-				trace('Realtime event receice');
-				trace('event.data');
-				trace(event.data as String);
-					var arc:Array = String(event.data).split('|');
-					var createInput:Allreport_input = new Allreport_input();
-					createInput.inputID 	= "INP" + new Date().valueOf().toString();
-					createInput.fieldID 	= '111';
-					createInput.input_date 	= dtf.format(new Date());
-					createInput.input_time 	= ttf.format(new Date());
-					createInput.input_1 	= (arc[0])?arc[0]:'0.00';
-					createInput.input_2 	= (arc[1])?arc[1]:'0.00';
-					createInput.input_3 	= (arc[2])?arc[2]:'0.00';
-					createInput.input_4 	= (arc[3])?arc[3]:'0.00';
-					createInput.input_5 	= (arc[4])?arc[4]:'0.00';
-					createInput.input_6 	= (arc[5])?arc[5]:'0.00';
-					createInput.input_7 	= (arc[6])?arc[6]:'0.00';
-					createInput.input_8 	= (arc[7])?arc[7]:'0.00';
-					createInput.input_9 	= (arc[8])?arc[8]:'0.00';
-					createInput.input_10 	= (arc[9])?arc[9]:'0.00';
-					createInput.input_11 	= (arc[10])?arc[10]:'0.00';
-					createInput.input_12	= (arc[11])?arc[11]:'0.00';
-					createInput.input_13 	= (arc[12])?arc[12]:'0.00';
-					createInput.input_14 	= (arc[13])?arc[13]:'0.00';
-					createInput.input_15 	= (arc[14])?arc[14]:'0.00';
-					createInput.input_16 	= (arc[15])?arc[15]:'0.00';
-					createField_inputResult.token = fieldinputService.createField_input(createInput);
-					lblstatus.text = Realtime.getInstance().lblstatus;
-					trace(ObjectUtil.toString(createInput));
-					Realtime.getInstance().arrDataList.addItemAt(createInput,0)
 			}
 			
 		]]>
@@ -159,6 +161,11 @@
 														 showBusyCursor="true"/>
 		<s:CallResponder id="getField_inputByreportIDResult" result="getField_inputByreportIDResult_resultHandler(event)"/>
 		<s:CallResponder id="createField_inputResult" fault="createField_inputResult_faultHandler(event)"/>
+		
+		<fieldinfoserviceservice:FieldinfoserviceService id="fieldinfoserviceService"
+														 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
+														 showBusyCursor="true"/>
+		<s:CallResponder id="getAllField_infoserviceSensorRealtimeResult" result="getAllField_infoserviceSensorRealtimeResult_resultHandler(event)"/>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
 	<s:BorderContainer left="2" right="2" top="2" bottom="2" borderVisible="false">
@@ -166,7 +173,7 @@
 			<s:Group width="100%" height="100%" chromeColor="#FF9999" fontFamily="Arial" fontSize="10">
 				<s:TextArea id="counter" width="100%" height="100%" text="" visible="false"/>
 				<mx:DataGrid id="dgDataList" left="5" right="5" top="60" bottom="5" borderVisible="false"
-							 chromeColor="#23AAE2" dataProvider="{Realtime.getInstance().arrDataList}" fontFamily="Arial" fontSize="10"
+							 chromeColor="#23AAE2" dataProvider="{arrDataList}" fontFamily="Arial" fontSize="10"
 							 fontWeight="normal" variableRowHeight="true"
 							 verticalGridLineColor="0xFFFFFF">
 					<mx:columns>
