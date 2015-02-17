@@ -11,6 +11,7 @@
 		<![CDATA[
 			import com.icd.fieldlogger.login.LoginModule;
 			import com.icd.fieldlogger.main.mainModule;
+			import com.icd.fieldlogger.myHome.realtime.infomation.Realtime;
 			
 			import mx.controls.Alert;
 			import mx.core.IVisualElement;
@@ -22,6 +23,7 @@
 			protected function application_creationCompleteHandler(event:FlexEvent):void {
 				changePanel(new mainModule());
 				//changePanel(new LoginModule());
+				Realtime.getInstance().parentt = this.systemManager;
 			}
 			//
 			public function changePanel(module:Module):void {

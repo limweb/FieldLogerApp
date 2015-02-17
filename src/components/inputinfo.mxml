@@ -1,19 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		  xmlns:s="library://ns.adobe.com/flex/spark" 
-		  xmlns:mx="library://ns.adobe.com/flex/mx" width="420" height="33">
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="420" height="33"
+		  creationComplete="vgroup1_creationCompleteHandler(event)"
+		  >
 	<fx:Script>
 		<![CDATA[
+			import com.icd.fieldlogger.myHome.realtime.infomation.RealtimeEvent;
+			import com.icd.fieldlogger.myHome.realtime.realtimeData.alarmSetting;
+			
+			import mx.events.FlexEvent;
+			
 			[Bindable]
-			public var data:Object;
+			[Embed(source = "../images/circle_red_1.png")]
+			private static var redpic:Class;
+			
+			[Bindable]
+			[Embed(source = "../images/circle_green_1.png")]
+			private static var greepic:Class;
+			
+			import mx.managers.PopUpManager;
+			
+			private var _data:Object;
+			
+			
+			private var test:int =0;
 			
 			[Bindable]
 			public var chk:Boolean = false;
+
+			[Bindable]
+			public function get data():Object
+			{
+				return _data;
+			}
+
+			public function set data(value:Object):void
+			{
+				_data = value;
+
+				lbH.setStyle('icon',redpic);
+				lbD.setStyle('icon',redpic);
+				lbI.setStyle('icon',redpic);
+				lbL.setStyle('icon',redpic);
+				
+			}
+
+			
+			protected function gpHIDL_clickHandler(event:MouseEvent):void{
+				var ttwdAlarm:alarmSetting = new alarmSetting();
+				PopUpManager.addPopUp(ttwdAlarm, this, true);
+				PopUpManager.centerPopUp(ttwdAlarm);
+			}
+			
 			public function init():void {
 				lblcol.setStyle('backgroundColor',data.sensorColor);
 			}
+
 			
+			protected function vgroup1_creationCompleteHandler(event:FlexEvent):void
+			{
+				this.systemManager.addEventListener(RealtimeEvent.REALTIMEEVENT, myEventHandler);
+			}
 			
+			private function myEventHandler(event:RealtimeEvent):void
+			{
+				trace('Event Realtime in Input info');
+				trace(event.data);
+				if(test == 0 ){
+					lbH.setStyle('icon',greepic);
+					lbD.setStyle('icon',redpic);
+					lbI.setStyle('icon',greepic);
+					lbL.setStyle('icon',redpic);
+					test = 1;
+				} else {
+					lbH.setStyle('icon',redpic);
+					lbD.setStyle('icon',greepic);
+					lbI.setStyle('icon',redpic);
+					lbL.setStyle('icon',greepic);
+					test = 0;
+				}
+				
+				validateDisplayList();
+			}
 			
 		]]>
 	</fx:Script>
@@ -28,11 +97,19 @@
 			<s:HGroup width="20"> 
 				<s:Label id="lblcol" width="20" height="20" backgroundColor="#FF0000"/>
 			</s:HGroup>
-			<s:HGroup height="20" fontWeight="bold" gap="10">
-				<s:RadioButton label=""/>
-				<s:RadioButton label=""/>
-				<s:RadioButton label=""/>
-				<s:RadioButton label=""/>
+			<s:HGroup id="gpHIDL" height="20" fontWeight="bold" gap="10" click="gpHIDL_clickHandler(event)">
+				<mx:LinkButton id="lbH" width="20" height="20" fontSize="10" fontWeight="bold"
+							   icon="{greepic}" paddingLeft="5"
+							   paddingRight="5" mouseEnabled="false"/>
+				<mx:LinkButton id="lbI" width="20" height="20" fontSize="10" fontWeight="bold"
+							   icon="{greepic}" paddingLeft="5"
+							   paddingRight="5" mouseEnabled="false"/>
+				<mx:LinkButton id="lbD" width="20" height="20" fontSize="10" fontWeight="bold"
+							   icon="{greepic}" paddingLeft="5"
+							   paddingRight="5" mouseEnabled="false"/>
+				<mx:LinkButton id="lbL" width="20" height="20" fontSize="10" fontWeight="bold"
+							   icon="{greepic}" paddingLeft="5"
+							   paddingRight="5" mouseEnabled="false"/>
 			</s:HGroup>
 			
 			<s:HGroup width="150" gap="25"> 

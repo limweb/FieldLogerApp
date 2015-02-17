@@ -6,7 +6,8 @@
 		  xmlns:treeservice="services.treeservice.*"
 		  xmlns:fieldinfoserviceservice="services.fieldinfoserviceservice.*"
 		  width="100%" height="100%" 
-		  creationComplete="creationCompleteHandler(event)" xmlns:components="components.*"
+		  creationComplete="creationCompleteHandler(event)" 
+		  xmlns:components="components.*"
 		  >
 	<fx:Script>
 		<![CDATA[
@@ -35,19 +36,11 @@
 			protected function creationCompleteHandler(event:FlexEvent):void{
 				inputcomponent.removeAll();
 				getAllField_infoserviceSensorRealtimeResult.token = fieldinfoserviceService.getAllField_infoserviceSensorRealtime(realtime_InfoModule.reportVO.sID);
-				/*t = new Timer(1000*5);
-				t.addEventListener(TimerEvent.TIMER, updateTimer);
-				urlReq = new URLRequest("http://ourproject.dyndns-server.com:8099/&");
-				urlLdr = new URLLoader();
-				urlLdr.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
-				urlLdr.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
-				urlLdr.addEventListener(Event.COMPLETE, doEventcomplete);*/
 			}
 			[Bindable] private var arrService:ArrayCollection = new ArrayCollection();
 			protected function getAllField_infoserviceSensorRealtimeResult_resultHandler(event:ResultEvent):void{
 				inputcomponent.removeAll();
 				arrService = event.result as ArrayCollection;
-//				Alert.show(ObjectUtil.toString(arrService));
 				var length:int = 0;
 				var ipi:inputinfo;
 				vgleft.removeAllElements();
@@ -70,22 +63,6 @@
 				  }
 				}
 			}
-			
-			
-			
-			
-			/*	protected function doEvent(event:Event):void
-			{
-			Alert.show('Error');
-			lblstatus.text = t.running.toString();
-			}
-			
-			private function updateTimer(evt:TimerEvent):void {
-			urlLdr.load(urlReq);
-			} */
-			
-			
-			
 			
 			protected function rdoInput1A_clickHandler(event:MouseEvent):void{
 				var ttwdAlarm:alarmSetting = new alarmSetting();
@@ -117,57 +94,6 @@
 					Alert.show('Please Select item to Show ?','Info');
 				}
 			}
-			
-			//Device
-			/* 	protected function doEventcomplete(event:Event):void
-			{
-			counter.appendText(CurrentDateTimeString() + '  =>' + event.target.data + '\n');					
-			//var inp:Inputlog = new Inputlog();
-			var arc:Array = String(event.target.data).split('|');
-			var createInput:AllField_input = new AllField_input();
-			createInput.input_discription = 'dev1';
-			createInput.input_status = 'system';
-			createInput.input_time = CurrentDateTimeString();
-			createInput.input_1 = arc[0];
-			createInput.input_2 = arc[1];
-			createInput.input_3 = arc[2];
-			createInput.input_4 = arc[3];
-			createInput.input_5 = arc[4];
-			createInput.input_6 = arc[5];
-			createInput.input_7 = arc[6];
-			createInput.input_8 = arc[7];
-			createField_inputResult.token = fieldinputService.createField_input(createInput);
-			lblstatus.text = t.running.toString();
-			}
-			
-			private function CurrentDateTimeString():String
-			{               
-			var CurrentDateTime:Date = new Date();
-			var CurrentDF:DateFormatter = new DateFormatter();
-			CurrentDF.formatString = "YYYY/MM/DD LL:NN:SS"
-			var DateTimeString:String = CurrentDF.format(CurrentDateTime);
-			return DateTimeString;
-			}
-			
-			
-			private function startTimer():void {
-			urlLdr.load(urlReq);
-			t.start();
-			lblstatus.text = t.running.toString();
-			}
-			
-			private function stopTimer():void {
-			t.stop();
-			lblstatus.text = t.running.toString();
-			}
-			
-			protected function createField_inputResult_resultHandler(event:ResultEvent):void
-			{
-			// TODO Auto-generated method stub
-			
-			}
-			*/
-		
 			
 		]]>
 	</fx:Script>
@@ -211,13 +137,6 @@
 					</s:HGroup>
 					<s:VGroup left="20" width="420" gap="15" height="100%" id="vgleft">
 						<components:inputinfo />
-						<components:inputinfo />
-						<components:inputinfo />
-						<components:inputinfo />
-						<components:inputinfo />
-						<components:inputinfo />
-						<components:inputinfo />
-						<components:inputinfo />
 					</s:VGroup>
 					</s:VGroup>
 					<s:VGroup right="30" width="420" gap="15" height="33" >
@@ -241,13 +160,6 @@
 						</s:HGroup>
 						
 						<s:VGroup left="20" width="420" gap="15" height="100%" id="vgright">
-							<components:inputinfo />
-							<components:inputinfo />
-							<components:inputinfo />
-							<components:inputinfo />
-							<components:inputinfo />
-							<components:inputinfo />
-							<components:inputinfo />
 							<components:inputinfo />
 						</s:VGroup>
 						</s:VGroup>
