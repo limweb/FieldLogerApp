@@ -3,8 +3,9 @@
 		  xmlns:s="library://ns.adobe.com/flex/spark"
 		  xmlns:mx="library://ns.adobe.com/flex/mx"
 		  xmlns:fieldinputservice="services.fieldinputservice.*"
-		  width="100%" height="100%" creationComplete="creationCompleteHandler(event)"
-		  xmlns:fieldreportinputservice="services.fieldreportinputservice.*" xmlns:fieldinfoserviceservice="services.fieldinfoserviceservice.*">
+		  width="100%" height="100%"
+		  xmlns:fieldreportinputservice="services.fieldreportinputservice.*"
+		  xmlns:fieldinfoserviceservice="services.fieldinfoserviceservice.*">
 	<fx:Script>
 		<![CDATA[
 
@@ -27,7 +28,8 @@
 			private var urlLdr:URLLoader;
 			private var CurrentDateTime:Date = new Date();
 			
-			protected function creationCompleteHandler(event:FlexEvent):void{
+			//creationComplete="creationCompleteHandler(event)"
+			/* protected function creationCompleteHandler(event:FlexEvent):void{
 				trace('start Timer');
 				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(realtime_InfoModule.reportVO.reportID);
 				getAllField_infoserviceSensorRealtimeResult.token = fieldinfoserviceService.getAllField_infoserviceSensorRealtime(realtime_InfoModule.reportVO.sID);
@@ -38,7 +40,7 @@
 				urlLdr.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
 				urlLdr.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
 				urlLdr.addEventListener(Event.COMPLETE, doEventcomplete); 
-			}
+			} */
 			
 			public function init():void {
 				trace('start Timer');
@@ -84,22 +86,22 @@
 				createInput.fieldID 	= realtime_InfoModule.reportVO.reportID;
 				createInput.input_date 	= dtf.format(new Date());
 				createInput.input_time 	= ttf.format(new Date());
-				createInput.input_1 	= (arc[0] && arrs[0].sensorNo)?(arrs[0].sensor_gain_a*arc[0])+arrs[0].sensor_offset_b:'0.00';
-				createInput.input_2 	= (arc[1] && arrs[1].sensorNo)?(arrs[1].sensor_gain_a*arc[1])+arrs[1].sensor_offset_b:'0.00';
-				createInput.input_3 	= (arc[2] && arrs[2].sensorNo)?(arrs[2].sensor_gain_a*arc[2])+arrs[2].sensor_offset_b:'0.00';
-				createInput.input_4 	= (arc[3] && arrs[3].sensorNo)?(arrs[3].sensor_gain_a*arc[3])+arrs[3].sensor_offset_b:'0.00';
-				createInput.input_5 	= (arc[4] && arrs[4].sensorNo)?(arrs[4].sensor_gain_a*arc[4])+arrs[4].sensor_offset_b:'0.00';
-				createInput.input_6 	= (arc[5] && arrs[5].sensorNo)?(arrs[5].sensor_gain_a*arc[5])+arrs[5].sensor_offset_b:'0.00';
-				createInput.input_7 	= (arc[6] && arrs[6].sensorNo)?(arrs[6].sensor_gain_a*arc[6])+arrs[6].sensor_offset_b:'0.00';
-				createInput.input_8 	= (arc[7] && arrs[7].sensorNo)?(arrs[7].sensor_gain_a*arc[7])+arrs[7].sensor_offset_b:'0.00';
-				createInput.input_9 	= (arc[8] && arrs[8].sensorNo)?(arrs[8].sensor_gain_a*arc[8])+arrs[8].sensor_offset_b:'0.00';
-				createInput.input_10 	= (arc[9] && arrs[9].sensorNo)?(arrs[9].sensor_gain_a*arc[9])+arrs[9].sensor_offset_b:'0.00';
-				createInput.input_11 	= (arc[10] && arrs[10].sensorNo)?(arrs[10].sensor_gain_a*arc[10])+arrs[10].sensor_offset_b:'0.00';
-				createInput.input_12	= (arc[11] && arrs[11].sensorNo)?(arrs[11].sensor_gain_a*arc[11])+arrs[11].sensor_offset_b:'0.00';
-				createInput.input_13 	= (arc[12] && arrs[12].sensorNo)?(arrs[12].sensor_gain_a*arc[12])+arrs[12].sensor_offset_b:'0.00';
-				createInput.input_14 	= (arc[13] && arrs[13].sensorNo)?(arrs[13].sensor_gain_a*arc[13])+arrs[13].sensor_offset_b:'0.00';
-				createInput.input_15 	= (arc[14] && arrs[14].sensorNo)?(arrs[14].sensor_gain_a*arc[14])+arrs[14].sensor_offset_b:'0.00';
-				createInput.input_16 	= (arc[15] && arrs[15].sensorNo)?(arrs[15].sensor_gain_a*arc[15])+arrs[15].sensor_offset_b:'0.00';
+				createInput.input_1 	= (arc[0])? arc[0]:'0.00';
+				createInput.input_2 	= (arc[1])? arc[1]:'0.00';
+				createInput.input_3 	= (arc[2])? arc[2]:'0.00';
+				createInput.input_4 	= (arc[3])? arc[3]:'0.00';
+				createInput.input_5 	= (arc[4])? arc[4]:'0.00';
+				createInput.input_6 	= (arc[5])? arc[5]:'0.00';
+				createInput.input_7 	= (arc[6])? arc[6]:'0.00';
+				createInput.input_8 	= (arc[7])? arc[7]:'0.00';
+				createInput.input_9 	= (arc[8])? arc[8]:'0.00';
+				createInput.input_10 	= (arc[9])? arc[9]:'0.00';
+				createInput.input_11 	= (arc[10])? arc[10]:'0.00';
+				createInput.input_12	= (arc[11])? arc[11]:'0.00';
+				createInput.input_13 	= (arc[12])? arc[12]:'0.00';
+				createInput.input_14 	= (arc[13])? arc[13]:'0.00';
+				createInput.input_15 	= (arc[14])? arc[14]:'0.00';
+				createInput.input_16 	= (arc[15])? arc[15]:'0.00';
 				createField_inputResult.token = fieldinputService.createField_input(createInput);
 				lblstatus.text = t.running.toString();
 				//trace(ObjectUtil.toString(createInput));
