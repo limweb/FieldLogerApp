@@ -44,8 +44,8 @@
 			
 			public function init():void {
 				trace('start Timer');
-				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(realtime_InfoModule.reportVO.reportID);
-				getAllField_infoserviceSensorRealtimeResult.token = fieldinfoserviceService.getAllField_infoserviceSensorRealtime(realtime_InfoModule.reportVO.sID);
+				//getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(realtime_InfoModule.reportVO.reportID);
+				//getAllField_infoserviceSensorRealtimeResult.token = fieldinfoserviceService.getAllField_infoserviceSensorRealtime(realtime_InfoModule.reportVO.sID);
 				t = new Timer(1000*5);
 				t.addEventListener(TimerEvent.TIMER, updateTimer);
 				urlReq = new URLRequest(realtime_InfoModule.urlSensor); // from database 
@@ -86,22 +86,22 @@
 				createInput.fieldID 	= realtime_InfoModule.reportVO.reportID;
 				createInput.input_date 	= dtf.format(new Date());
 				createInput.input_time 	= ttf.format(new Date());
-				createInput.input_1 	= (arc[0])? arc[0]:'0.00';
-				createInput.input_2 	= (arc[1])? arc[1]:'0.00';
-				createInput.input_3 	= (arc[2])? arc[2]:'0.00';
-				createInput.input_4 	= (arc[3])? arc[3]:'0.00';
-				createInput.input_5 	= (arc[4])? arc[4]:'0.00';
-				createInput.input_6 	= (arc[5])? arc[5]:'0.00';
-				createInput.input_7 	= (arc[6])? arc[6]:'0.00';
-				createInput.input_8 	= (arc[7])? arc[7]:'0.00';
-				createInput.input_9 	= (arc[8])? arc[8]:'0.00';
-				createInput.input_10 	= (arc[9])? arc[9]:'0.00';
-				createInput.input_11 	= (arc[10])? arc[10]:'0.00';
-				createInput.input_12	= (arc[11])? arc[11]:'0.00';
-				createInput.input_13 	= (arc[12])? arc[12]:'0.00';
-				createInput.input_14 	= (arc[13])? arc[13]:'0.00';
-				createInput.input_15 	= (arc[14])? arc[14]:'0.00';
-				createInput.input_16 	= (arc[15])? arc[15]:'0.00';
+				createInput.input_1 	= arc[0]? arc[0]:'0.00';
+				createInput.input_2 	= arc[1]? arc[1]:'0.00';
+				createInput.input_3 	= arc[2]? arc[2]:'0.00';
+				createInput.input_4 	= arc[3]? arc[3]:'0.00';
+				createInput.input_5 	= arc[4]? arc[4]:'0.00';
+				createInput.input_6 	= arc[5]? arc[5]:'0.00';
+				createInput.input_7 	= arc[6]? arc[6]:'0.00';
+				createInput.input_8 	= arc[7]? arc[7]:'0.00';
+				createInput.input_9 	= arc[8]? arc[8]:'0.00';
+				createInput.input_10 	= arc[9]? arc[9]:'0.00';
+				createInput.input_11 	= arc[10]? arc[10]:'0.00';
+				createInput.input_12	= arc[11]? arc[11]:'0.00';
+				createInput.input_13 	= arc[12]? arc[12]:'0.00';
+				createInput.input_14 	= arc[13]? arc[13]:'0.00';
+				createInput.input_15 	= arc[14]? arc[14]:'0.00';
+				createInput.input_16 	= arc[15]? arc[15]:'0.00';
 				createField_inputResult.token = fieldinputService.createField_input(createInput);
 				lblstatus.text = t.running.toString();
 				//trace(ObjectUtil.toString(createInput));
