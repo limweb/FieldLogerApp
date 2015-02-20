@@ -5,10 +5,12 @@
 		  xmlns:fieldinputservice="services.fieldinputservice.*"
 		  width="100%" height="100%"
 		  xmlns:fieldreportinputservice="services.fieldreportinputservice.*"
-		  xmlns:fieldinfoserviceservice="services.fieldinfoserviceservice.*">
+		  xmlns:fieldinfoserviceservice="services.fieldinfoserviceservice.*"
+		  
+		  >
 	<fx:Script>
 		<![CDATA[
-
+			import com.icd.fieldlogger.myHome.realtime.infomation.Realtime;
 			import com.icd.fieldlogger.myHome.realtime.infomation.realtime_InfoModule;
 			
 			import mx.collections.ArrayCollection;
@@ -22,63 +24,23 @@
 			
 			import valueObjects.Allreport_input;
 			
-			
-			private var t:Timer;
-			private var urlReq:URLRequest;
-			private var urlLdr:URLLoader;
 			private var CurrentDateTime:Date = new Date();
 			
-			//creationComplete="creationCompleteHandler(event)"
-			/* protected function creationCompleteHandler(event:FlexEvent):void{
-				trace('start Timer');
-				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(realtime_InfoModule.reportVO.reportID);
-				getAllField_infoserviceSensorRealtimeResult.token = fieldinfoserviceService.getAllField_infoserviceSensorRealtime(realtime_InfoModule.reportVO.sID);
-				t = new Timer(1000*5);
-				t.addEventListener(TimerEvent.TIMER, updateTimer);
-				urlReq = new URLRequest(realtime_InfoModule.urlSensor); // from database 
-				urlLdr = new URLLoader();
-				urlLdr.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
-				urlLdr.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
-				urlLdr.addEventListener(Event.COMPLETE, doEventcomplete); 
-			} */
-			
 			public function init():void {
-				trace('start Timer');
-				//getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(realtime_InfoModule.reportVO.reportID);
-				//getAllField_infoserviceSensorRealtimeResult.token = fieldinfoserviceService.getAllField_infoserviceSensorRealtime(realtime_InfoModule.reportVO.sID);
-				t = new Timer(1000*5);
-				t.addEventListener(TimerEvent.TIMER, updateTimer);
-				urlReq = new URLRequest(realtime_InfoModule.urlSensor); // from database 
-				urlLdr = new URLLoader();
-				urlLdr.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
-				urlLdr.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
-				urlLdr.addEventListener(Event.COMPLETE, doEventcomplete); 
 			}
 			
-			[Bindable] private var arrDataList:ArrayCollection = new ArrayCollection();
 			protected function getField_inputByreportIDResult_resultHandler(event:ResultEvent):void{
-				arrDataList = event.result as ArrayCollection;
+				Realtime.getInstance().arrDataList = event.result as ArrayCollection;
 			}
 			[Bindable] private var arrs:ArrayCollection = new ArrayCollection();
 			protected function getAllField_infoserviceSensorRealtimeResult_resultHandler(event:ResultEvent):void{
 				arrs = event.result as ArrayCollection;
 			}
 			
-			private function updateTimer(evt:TimerEvent):void {
-				urlLdr.load(urlReq);
-			}
-			
-			protected function doEvent(event:Event):void{
-				Alert.show('Error');
-				lblstatus.text = t.running.toString();
-			}
 			
 			protected function doEventcomplete(event:Event):void
 			{
-				//counter.appendText(CurrentDateTimeString() + '  =>' + event.target.data + '\n');					
-				//var inp:Inputlog = new Inputlog();
 				var arc:Array = String(event.target.data).split('|');
-				
 				trace(ObjectUtil.toString(arrs));
 				var createInput:Allreport_input = new Allreport_input();
 				
@@ -103,16 +65,11 @@
 				createInput.input_15 	= arc[14]? arc[14]:'0.00';
 				createInput.input_16 	= arc[15]? arc[15]:'0.00';
 				createField_inputResult.token = fieldinputService.createField_input(createInput);
-				lblstatus.text = t.running.toString();
 				//trace(ObjectUtil.toString(createInput));
-				arrDataList.addItemAt(createInput,0);
+				Realtime.getInstance().arrDataList.addItemAt(createInput,0);
 			}
 			
 			protected function linkbutton1_clickHandler(event:MouseEvent):void{
-				/* var ttwdImport:importExcel = new importExcel();
-				PopUpManager.addPopUp(ttwdImport, this, true);
-				PopUpManager.centerPopUp(ttwdImport);
-				ttwdImport.addEventListener(CloseEvent.CLOSE, alphaPopupCloseHandler); */
 			}
 			private function alphaPopupCloseHandler(e:CloseEvent):void{
 				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(realtime_InfoModule.reportVO.reportID);
@@ -124,32 +81,9 @@
 			}
 			
 			
-			public function start():void
-			{
-				trace('start');
-				urlLdr.load(urlReq);
-				if( t.running){
-					t.stop();
-					t.removeEventListener(TimerEvent.TIMER, updateTimer);
-				}
-				var i:int = 5*1000;  // 5 sec
-				t = new Timer(i);
-				t.addEventListener(TimerEvent.TIMER, updateTimer);
-				t.start();
-				lblstatus.text = t.running.toString();
-			}
-			
-			public function stop():void
-			{
-				trace('stop');
-				t.stop();
-				lblstatus.text = t.running.toString();
-			}
-			
-			
 			protected function createField_inputResult_faultHandler(event:FaultEvent):void
 			{
-				stop();
+				Realtime.getInstance().stop();
 			}
 			
 		]]>
@@ -175,7 +109,7 @@
 			<s:Group width="100%" height="100%" chromeColor="#FF9999" fontFamily="Arial" fontSize="10">
 				<s:TextArea id="counter" width="100%" height="100%" text="" visible="false"/>
 				<mx:DataGrid id="dgDataList" left="5" right="5" top="60" bottom="5" borderVisible="false"
-							 chromeColor="#23AAE2" dataProvider="{arrDataList}" fontFamily="Arial" fontSize="10"
+							 chromeColor="#23AAE2" dataProvider="{Realtime.getInstance().arrDataList}" fontFamily="Arial" fontSize="10"
 							 fontWeight="normal" variableRowHeight="true"
 							 verticalGridLineColor="0xFFFFFF">
 					<mx:columns>
