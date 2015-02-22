@@ -58,6 +58,7 @@
 			[Bindable] public static var pjName:String;
 			[Bindable] public static var svName:String;
 			[Bindable] public static var reportVO:Allreport_infoAdvanced = new Allreport_infoAdvanced();
+			[Bindable] public static var chkint:int = 0;
 			
 			[Bindable] private var MODE:int;
 			[Bindable] private var titleName:String;
@@ -127,6 +128,8 @@
 			}
 			
 			protected function closeHandler(event:CloseEvent):void{
+				tbdatalist.removeevent();
+				Realtime.getInstance().stop();
 				PopUpManager.removePopUp(this);
 			}
 			
@@ -486,6 +489,7 @@
 			protected function titlewindow1_creationCompleteHandler(event:FlexEvent):void
 			{
 				fieldinfoserviceService.getAllField_infoserviceSensorRealtime(realtime_InfoModule.reportVO.sID);
+				chkint = 1;
 			}
 			
 		]]>
@@ -845,8 +849,8 @@
 								<s:Label x="10" top="3" height="20" fontSize="11" fontWeight="bold"
 										 text="Project Infomation" textAlign="left"
 										 verticalAlign="middle"/>
-								<mx:HRule left="10" top="25" width="120"/>
-								<s:NumericStepper x="134" y="1" maximum="100" minimum="0" value="@{Realtime.getInstance().sec}"/>
+								<mx:HRule left="10" top="26" width="192" height="3"/>
+								<s:NumericStepper x="143" y="1" maximum="100" minimum="0"  value="@{Realtime.getInstance().sec}"/>
 							</s:Group>
 						</s:Scroller>
 					</s:BorderContainer>

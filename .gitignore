@@ -10,5 +10,7 @@ bootstrap/compiled.php
 .svn
 phpserver/
 FieldLogger.air
-src/FieldLogger-app.xml
-
+/src/FieldLogger-app.xml
+bin/
+bin-debug/
+bin-release/

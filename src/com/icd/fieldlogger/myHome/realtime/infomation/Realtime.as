@@ -20,8 +20,7 @@ package com.icd.fieldlogger.myHome.realtime.infomation
 		private var urlReq:URLRequest;
 		private var urlLdr:URLLoader;
 		private var _url:String = '';
-		private var _sec:int = 10000;
-		
+		private var _sec:int = 10;
 		public var parentt:* ;
 		
 		public var arrDataList:ArrayCollection = new ArrayCollection();
@@ -35,7 +34,7 @@ package com.icd.fieldlogger.myHome.realtime.infomation
 				throw new Error("Singleton can only be accessed through Singleton.instance");
 			}
 			trace('new reailtime class');
-			t = new Timer(1000*10);
+			t = new Timer(_sec * 1000);
 			t.addEventListener(TimerEvent.TIMER, updateTimer);
 			urlReq = new URLRequest(url); // from database 
 			urlLdr = new URLLoader();
@@ -49,10 +48,10 @@ package com.icd.fieldlogger.myHome.realtime.infomation
 		{
 			return _sec;
 		}
-
+		
 		public function set sec(value:int):void
 		{
-			_sec = value * 1000 ;
+			_sec = value;
 		}
 
 		protected function doEventcomplete(event:Event):void
@@ -134,7 +133,7 @@ package com.icd.fieldlogger.myHome.realtime.infomation
 					urlReq.url = url;
 					urlLdr.load(urlReq);
 					trace('sec = ',sec);
-					t = new Timer(sec);
+					t = new Timer(sec * 1000);
 					t.addEventListener(TimerEvent.TIMER, updateTimer);
 					t.start();
 					lblstatus = t.running.toString();
@@ -143,7 +142,7 @@ package com.icd.fieldlogger.myHome.realtime.infomation
 					trace('url=',url);
 					urlReq.url = url;
 					urlLdr.load(urlReq);
-					t = new Timer(sec);
+					t = new Timer(sec * 1000 );
 					t.addEventListener(TimerEvent.TIMER, updateTimer);
 					t.start();
 					lblstatus = t.running.toString();

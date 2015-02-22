@@ -77,16 +77,16 @@
 				 textAlign="center" verticalAlign="middle"/>
 		<s:VGroup right="10" top="10" bottom="10" gap="0" textAlign="center" verticalAlign="middle">
 			<mx:LinkButton id="lbH" width="20" height="20" fontSize="10" fontWeight="bold"
-						    paddingLeft="5"
+						    paddingLeft="5" icon="{greepic}"
 						   paddingRight="5" mouseEnabled="false"/>
 			<mx:LinkButton id="lbI" width="20" height="20" fontSize="10" fontWeight="bold"
-						   paddingLeft="5"
+						   paddingLeft="5" icon="{greepic}"
 						   paddingRight="5" mouseEnabled="false"/>
 			<mx:LinkButton id="lbD" width="20" height="20" fontSize="10" fontWeight="bold"
-						   paddingLeft="5"
+						   paddingLeft="5" icon="{greepic}"
 						   paddingRight="5" mouseEnabled="false"/>
 			<mx:LinkButton id="lbL" width="20" height="20" fontSize="10" fontWeight="bold"
-						   paddingLeft="5"
+						   paddingLeft="5" icon="{greepic}"
 						   paddingRight="5" mouseEnabled="false"/>
 		</s:VGroup>
 </s:BorderContainer>
