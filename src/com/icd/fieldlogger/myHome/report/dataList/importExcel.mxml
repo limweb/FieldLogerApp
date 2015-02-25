@@ -10,6 +10,7 @@
 		<![CDATA[
 			import com.as3xls.xls.ExcelFile;
 			import com.csv.EncodeUtil;
+			import com.icd.fieldlogger.myHome.realtime.infomation.realtime_InfoModule;
 			import com.icd.fieldlogger.myHome.report.infomation.report_InfoModule;
 			
 			import mx.collections.ArrayCollection;
@@ -181,6 +182,7 @@
 						//var o:Object = new Object();
 						o = new Allreport_input();
 						o.fieldID		= report_InfoModule.reportVO.reportID;
+//						o.inputID = realtime_InfoModule.reportVO.reportID;
 						o.inputID 		= ac[i][0].value;
 						o.input_date 	= dtf.format(ac[i][1].value);
 						o.input_time	= ttf.format(ac[i][1].value);
@@ -209,7 +211,9 @@
 					for (var j:int = 0; j < ac.length; j++) {
 						o = new Allreport_input();
  						var csv:Inputcsv = new Inputcsv();
-						csv.fieldID		= report_InfoModule.reportVO.reportID;
+//						csv.fieldID		= report_InfoModule.reportVO.reportID;
+						trace('csv reportid=',realtime_InfoModule.reportVO.reportID);
+						csv.fieldID		= realtime_InfoModule.reportVO.reportID;
 						for(var x:int=0;x< headerArray.length ;x++){
 							if( ac[j][headerArray[x]] == undefined ){
 								break;

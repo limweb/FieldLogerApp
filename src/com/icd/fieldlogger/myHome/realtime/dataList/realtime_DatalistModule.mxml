@@ -13,6 +13,7 @@
 			import com.icd.fieldlogger.myHome.realtime.infomation.Realtime;
 			import com.icd.fieldlogger.myHome.realtime.infomation.RealtimeEvent;
 			import com.icd.fieldlogger.myHome.realtime.infomation.realtime_InfoModule;
+			import com.icd.fieldlogger.myHome.report.dataList.importExcel;
 			import com.icd.fieldlogger.myHome.report.infomation.report_InfoModule;
 			
 			import mx.collections.ArrayCollection;
@@ -41,6 +42,12 @@
 				arrs = event.result as ArrayCollection;
 			}
 			
+			protected function linkbutton1_clickHandler(event:MouseEvent):void{
+				var ttwdImport:importExcel = new importExcel();
+				PopUpManager.addPopUp(ttwdImport, this, true);
+				PopUpManager.centerPopUp(ttwdImport);
+				ttwdImport.addEventListener(CloseEvent.CLOSE, alphaPopupCloseHandler);
+			}
 			private function alphaPopupCloseHandler(e:CloseEvent):void{
 				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(realtime_InfoModule.reportVO.reportID);
 			}
@@ -63,7 +70,7 @@
 				trace('addevent listener');
 				this.systemManager.addEventListener(RealtimeEvent.REALTIMEEVENT, myEventHandler);
 				trace('start Timer');
-				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(report_InfoModule.reportVO.reportID);
+				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(realtime_InfoModule.reportVO.reportID);
 			}
 			
 			public function removeevent():void {
@@ -75,10 +82,11 @@
 				trace('Realtime event receice');
 				trace('event.data');
 				trace(event.data as String);
+				trace('reportid=',realtime_InfoModule.reportVO.reportID);
 				var arc:Array = String(event.data).split('|');
 				var createInput:Allreport_input = new Allreport_input();
 				createInput.inputID 	= "INP" + new Date().valueOf().toString();
-				createInput.fieldID 	= '111';
+				createInput.fieldID 	= realtime_InfoModule.reportVO.reportID;
 				createInput.input_date 	= dtf.format(new Date());
 				createInput.input_time 	= ttf.format(new Date());
 				createInput.input_1 	= (arc[0])?arc[0]:'0.00';
@@ -189,13 +197,14 @@
 				
 				
 				<s:HGroup right="5" top="5" height="25" color="#000000">
-					<!--<mx:LinkButton width="70" height="25" label="Import" color="#000000" fontSize="10"
-								   fontWeight="bold" icon="@Embed(source='../images/table_import.png')"
-								   paddingLeft="5" paddingRight="5" toolTip="start synchronization"
-								   click="linkbutton1_clickHandler(event)"/>
+					<mx:LinkButton width="70" height="25" label="Import"
+								   click="linkbutton1_clickHandler(event)" color="#000000"
+								   fontSize="10" fontWeight="bold"
+								   icon="@Embed(source='../images/table_import.png')"
+								   paddingLeft="5" paddingRight="5" toolTip="start synchronization"/>
 					<mx:LinkButton width="70" height="25" label="Export" color="#000000" fontSize="10"
 								   fontWeight="bold" icon="@Embed(source='../images/table_export.png')"
-								   paddingLeft="5" paddingRight="5" toolTip="start synchronization"/>-->
+								   paddingLeft="5" paddingRight="5" toolTip="start synchronization"/>
 					<mx:LinkButton width="70" height="25" label="Print" color="#000000" fontSize="10"
 								   fontWeight="bold" icon="@Embed(source='../images/printer.png')"
 								   paddingLeft="5" paddingRight="5" toolTip="start synchronization"/>
