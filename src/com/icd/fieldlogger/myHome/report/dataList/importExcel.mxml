@@ -52,8 +52,8 @@
 			
 			protected function lbtnUpload_clickHandler(event:MouseEvent):void {
 				checkDump = false;
-//				var XLS_FILTER:FileFilter = new FileFilter("Import Excels", "*.xls;*.xlsx;*.csv;*.xlsm");
-				var XLS_FILTER:FileFilter = new FileFilter("Import Excels", "*.csv");
+				var XLS_FILTER:FileFilter = new FileFilter("Import Excels", "*.xls;*.xlsx;*.csv;*.xlsm");
+				// var XLS_FILTER:FileFilter = new FileFilter("Import Excels", "*.csv");
 				fileRef.browse([XLS_FILTER]);
 				message.text = "";
 			}
@@ -181,9 +181,9 @@
 						if(ac[i][0].value){
 						//var o:Object = new Object();
 						o = new Allreport_input();
-						o.fieldID		= report_InfoModule.reportVO.reportID;
-//						o.inputID = realtime_InfoModule.reportVO.reportID;
-						o.inputID 		= ac[i][0].value;
+//						o.fieldID		= report_InfoModule.reportVO.reportID;
+						o.fieldID		= realtime_InfoModule.reportVO.reportID;
+						o.inputID = realtime_InfoModule.reportVO.reportID;
 						o.input_date 	= dtf.format(ac[i][1].value);
 						o.input_time	= ttf.format(ac[i][1].value);
 						if(grid.columnCount >= 3) 	o.input_1 		= ac[i][2].value;
