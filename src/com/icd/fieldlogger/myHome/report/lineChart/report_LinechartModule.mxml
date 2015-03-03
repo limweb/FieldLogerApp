@@ -12,123 +12,222 @@
 		  >
 	<fx:Script>
 		<![CDATA[
+			import com.icd.fieldlogger.myHome.realtime.infomation.RealtimeEvent;
 			import com.icd.fieldlogger.myHome.report.infomation.report_InfoModule;
 			
-			import mx.collections.ArrayCollection;
-			import mx.controls.Alert;
-			import mx.events.DividerEvent;
 			import mx.events.FlexEvent;
-			import mx.graphics.SolidColor;
-			import mx.graphics.Stroke;
-			import mx.rpc.events.ResultEvent;
-			[Bindable] public var areaStroke:Stroke = new Stroke(0x0033CC, 2);
-			[Bindable] public var areaColor:SolidColor = new SolidColor(0x0033CC, 0.5);
+		
+			[Bindable] protected var items:Array = [];
 			
-			[Bindable] private var chartData:ArrayCollection = new ArrayCollection();
-			[Bindable] public var myData:ArrayCollection = new ArrayCollection();
-			
-			[Bindable] private var leftBoundary:Number;
-			[Bindable] private var rightBoundary:Number;
-			private var LEFT_START:Number = 15;
-			private var RIGHT_START:Number = 25;
-			[Bindable] public var maxVAxis:Number = 10;
-			
-			[Bindable] public var dividerClass:Class;
-			
-			[Embed(source="img/blank.png")] 
-			[Bindable] public var blankDividerClass:Class;
-			
-			[Bindable] 
-			public var gapBetweenCharts:Number = 0;
-			
-			[Bindable] 
-			public var gapAtBottom:Number = 0;
-			
-			public var mouseXRef:Number;
-			
-			private var staticLeftBoundary:Number;
-			private var staticRightBoundary:Number;
-			
-			
-			protected function parseData(ac:ArrayCollection):void
+			protected function simulateValue(oldValue:Number):Number
 			{
-				chartData = ac;
-				chartData.refresh();
-				myData = new ArrayCollection(chartData.source);
-				myData.refresh();
-				leftBoundary = LEFT_START;
-				rightBoundary = RIGHT_START;
-				updateBoundariesFromSlider();
+				//				To avoid completely random values and very sharp spikes in the chart, 
+				//				we determine that the new value can only be within a +/- 5/1000 range 
+				//				of the previous value.
+				var maxChange:Number = oldValue * 0.005;
+				return oldValue + (maxChange - Math.random() * maxChange * 2);
+			}
+			
+			protected function timerHandler(event:TimerEvent):void
+			{
 				
+				
+				
+				items.push({time: new Date().time, value: simulateValue(items[items.length -1].value ),value1: simulateValue(items[items.length -1].value1 ),value2: simulateValue(items[items.length -1].value2 ), value3: simulateValue(items[items.length -1].value3 ),value4: simulateValue(items[items.length -1].value4 ), value5: simulateValue(items[items.length -1].value5 )  });
+//				items.push({time: new Date().time, value: simulateValue(items[items.length -1].value ),value1: simulateValue(items[items.length -1].value1 ),value2: simulateValue(items[items.length -1].value2 ), value3: simulateValue(items[items.length -1].value3 ),value4: simulateValue(items[items.length -1].value4 ), value5: simulateValue(items[items.length -1].value5 )  });
+//				items.push({time: new Date().time, value: simulateValue(items[items.length -1].value ),value1: simulateValue(items[items.length -1].value1 ),value2: simulateValue(items[items.length -1].value2 ), value3: simulateValue(items[items.length -1].value3 ),value4: simulateValue(items[items.length -1].value4 ), value5: simulateValue(items[items.length -1].value5 )  });
+//				items.push({time: new Date().time, value: simulateValue(items[items.length -1].value ),value1: simulateValue(items[items.length -1].value1 ),value2: simulateValue(items[items.length -1].value2 ), value3: simulateValue(items[items.length -1].value3 ),value4: simulateValue(items[items.length -1].value4 ), value5: simulateValue(items[items.length -1].value5 )  });
+//				items.push({time: new Date().time, value: simulateValue(items[items.length -1].value ),value1: simulateValue(items[items.length -1].value1 ),value2: simulateValue(items[items.length -1].value2 ), value3: simulateValue(items[items.length -1].value3 ),value4: simulateValue(items[items.length -1].value4 ), value5: simulateValue(items[items.length -1].value5 )  });
+//				items.push({time: new Date().time, value: simulateValue(items[items.length -1].value ),value1: simulateValue(items[items.length -1].value1 ),value2: simulateValue(items[items.length -1].value2 ), value3: simulateValue(items[items.length -1].value3 ),value4: simulateValue(items[items.length -1].value4 ), value5: simulateValue(items[items.length -1].value5 )  });
+				
+				
+				items.shift();
+				drawChart();
 			}
 			
-			
-			private function setMouseDown(theChart:CartesianChart):void
+			protected function drawChart():void
 			{
-				mouseXRef = this.mouseX;
-				staticLeftBoundary = leftBoundary;
-				staticRightBoundary = rightBoundary;
+				var minTime:Number = items[0].time;
+				var maxTime:Number = items[items.length - 1].time;
+				
+				var minValue:Number = items[0].value;
+				var maxValue:Number = items[0].value;
+				
+				var minValue1:Number = items[0].value1;
+				var maxValue1:Number = items[0].value1;
+				var minValue2:Number = items[0].value2;
+				var maxValue2:Number = items[0].value2;
+				var minValue3:Number = items[0].value3;
+				var maxValue3:Number = items[0].value3;
+				var minValue4:Number = items[0].value4;
+				var maxValue4:Number = items[0].value4;
+				var minValue5:Number = items[0].value5;
+				var maxValue5:Number = items[0].value5;
+				
+				var i:int;
+				
+				for (i=1; i<items.length; i++)
+				{
+					if (items[i].value < minValue) minValue = items[i].value;
+					if (items[i].value > maxValue) maxValue = items[i].value;
+					
+					if (items[i].value1 < minValue1) minValue1 = items[i].value1;
+					if (items[i].value1 > maxValue1) maxValue1 = items[i].value1;
+					
+					if (items[i].value2 < minValue2) minValue2 = items[i].value2;
+					if (items[i].value2 > maxValue2) maxValue2 = items[i].value2;
+					
+					if (items[i].value3 < minValue3) minValue3 = items[i].value3;
+					if (items[i].value3 > maxValue3) maxValue3 = items[i].value3;
+					
+					if (items[i].value4 < minValue4) minValue4 = items[i].value4;
+					if (items[i].value4 > maxValue4) maxValue4 = items[i].value4;
+					
+					if (items[i].value5 < minValue5) minValue5 = items[i].value5;
+					if (items[i].value5 > maxValue5) maxValue5 = items[i].value5;
+					
+					
+				}
+				
+				var pathData:String = "";
+				var xPos:Number;
+				var yPos:Number;
+				
+				var pathData1:String = "";
+				var xPos1:Number;
+				var yPos1:Number;
+				
+				var pathData2:String = "";
+				var xPos2:Number;
+				var yPos2:Number;
+				
+				var pathData3:String = "";
+				var xPos3:Number;
+				var yPos3:Number;
+				
+				var pathData4:String = "";
+				var xPos4:Number;
+				var yPos4:Number;
+				
+				var pathData5:String = "";
+				var xPos5:Number;
+				var yPos5:Number;
+				
+				for (i=0; i<items.length; i++)
+				{
+					yPos = chart.height - (items[i].value - minValue) / (maxValue - minValue) * chart.height;
+					yPos1 = chart1.height - (items[i].value1 - minValue1) / (maxValue1 - minValue1) * chart1.height;
+					yPos2 = chart2.height - (items[i].value2 - minValue2) / (maxValue2 - minValue2) * chart2.height;
+					yPos3 = chart3.height - (items[i].value3 - minValue3) / (maxValue3 - minValue3) * chart3.height;
+					yPos4 = chart4.height - (items[i].value4 - minValue4) / (maxValue4 - minValue4) * chart4.height;
+					yPos5 = chart5.height - (items[i].value5 - minValue5) / (maxValue5 - minValue5) * chart5.height;
+					
+					
+					xPos = (items[i].time - minTime) / (maxTime - minTime) * chart.width;
+					xPos1 = (items[i].time - minTime) / (maxTime - minTime) * chart1.width;
+					xPos2 = (items[i].time - minTime) / (maxTime - minTime) * chart2.width;
+					xPos3 = (items[i].time - minTime) / (maxTime - minTime) * chart3.width;
+					xPos4 = (items[i].time - minTime) / (maxTime - minTime) * chart4.width;
+					xPos5 = (items[i].time - minTime) / (maxTime - minTime) * chart5.width;
+					
+					pathData += (i==0 ? "M " : " L ") + xPos + " " + yPos;
+					pathData1 += (i==0 ? "M " : " L ") + xPos1 + " " + yPos1;
+					pathData2 += (i==0 ? "M " : " L ") + xPos2 + " " + yPos2;
+					pathData3 += (i==0 ? "M " : " L ") + xPos3 + " " + yPos3;
+					pathData4 += (i==0 ? "M " : " L ") + xPos4 + " " + yPos4;
+					pathData5 += (i==0 ? "M " : " L ") + xPos5 + " " + yPos5;
+					
+					
+					path.data = pathData;
+					path1.data = pathData1;
+					path2.data = pathData2;
+					path3.data = pathData3;
+					path4.data = pathData4;
+					path5.data = pathData5;
+					
+				}
 			}
 			
-			protected function init(event:FlexEvent):void{
-				getField_inputByreportIDResult.token = fieldinputService.getField_inputByreportID(report_InfoModule.reportVO.reportID);
-				trace('width=',screen.width);
-				sc.width = screen.width;
-				trace('height=',screen.height);
-				sc.height = screen.height-200;
-			}
-			
-			
-			[Bindable] private var arrInpurt:ArrayCollection = new ArrayCollection()
-			protected function getField_inputByreportIDResult_resultHandler(event:ResultEvent):void{
-				arrInpurt = event.result as ArrayCollection;
-				chartData = arrInpurt;
-				chartData.refresh();
-				myData = new ArrayCollection(chartData.source);
-				myData.refresh();
-				leftBoundary = LEFT_START;
-				rightBoundary = RIGHT_START;
-				updateBoundariesFromSlider();
-			}
-			
-			
-			private function updateBoundariesFromSlider():void
+			protected function init(event:FlexEvent):void
 			{
-				leftBoundary = slider.values[0];
-				rightBoundary = slider.values[1];
-				updateMainData();
-			}
-			private function updateBoundariesFromDivider(event:DividerEvent):void
-			{
-				leftBoundary = Math.abs(HDividedBox(event.target).getChildAt(0).width / (event.target.width / arrInpurt.length));
-				rightBoundary = Math.abs(arrInpurt.length - (HDividedBox(event.target).getChildAt(2).width / (event.target.width / arrInpurt.length)));
-				trace(leftBoundary, rightBoundary);
-				updateMainData();
+				//				Simulate items for the last 2 minutes			
+				var now:Date = new Date();
+				var value:Number = 1000;
+				var value1:Number = 1000;
+				var value2:Number = 1000;
+				var value3:Number = 1000;
+				var value4:Number = 1000;
+				var value5:Number = 1000;
+				for (var time:Number = now.time - 120 * 1000 ; time < now.time ; time += 1000 )
+				{
+					value = simulateValue(value);
+					value1 = simulateValue(value);
+					value2 = simulateValue(value);
+					value3 = simulateValue(value);
+					value4 = simulateValue(value);
+					value5 = simulateValue(value);
+					
+					items.push({time: time, value: value ,value1: value1,value2: value2,value3: value3,value4: value4,value5: value5});
+				}	
+				
+				drawChart();
+				
+				//				Set up a Timer to generate a new value every second
+//				var stockUpdate:Timer = new Timer(1000, 0);
+//				stockUpdate.addEventListener(TimerEvent.TIMER, timerHandler);
+//				stockUpdate.start();
+ 				this.systemManager.addEventListener(RealtimeEvent.REALTIMEEVENT, myEventHandler);
 			}
 			
-			private function updateMainData():void
-			{
-				var ar:Array = arrInpurt.source.slice(leftBoundary, rightBoundary)
-				myData = new ArrayCollection();
-				myData = new ArrayCollection(ar);
-				validateNow();
+			
+			public function removeevent():void {
+				trace('remove datalist realtime event');
+				this.systemManager.removeEventListener(RealtimeEvent.REALTIMEEVENT, myEventHandler);
 			}
+			
+			private function myEventHandler(event:RealtimeEvent):void
+			{
+				var arc:Array = String(event.data).split('|');
+				items.push({
+					time: new Date().time, 
+					value: (arc[0])?arc[0]:'0.00' ,
+					value1: (arc[1])?arc[1]:'0.00',
+					value2: (arc[2])?arc[2]:'0.00', 
+					value3: (arc[3])?arc[3]:'0.00', 
+					value4: (arc[4])?arc[4]:'0.00', 
+					value5: (arc[5])?arc[5]:'0.00' 
+				});
+//				items.push({time: new Date().time, value: simulateValue(items[items.length -1].value ),value1: simulateValue(items[items.length -1].value1 ),value2: simulateValue(items[items.length -1].value2 ), value3: simulateValue(items[items.length -1].value3 ),value4: simulateValue(items[items.length -1].value4 ), value5: simulateValue(items[items.length -1].value5 )  });
+//				items.push({time: new Date().time, value: simulateValue(items[items.length -1].value ),value1: simulateValue(items[items.length -1].value1 ),value2: simulateValue(items[items.length -1].value2 ), value3: simulateValue(items[items.length -1].value3 ),value4: simulateValue(items[items.length -1].value4 ), value5: simulateValue(items[items.length -1].value5 )  });
+//				items.push({time: new Date().time, value: simulateValue(items[items.length -1].value ),value1: simulateValue(items[items.length -1].value1 ),value2: simulateValue(items[items.length -1].value2 ), value3: simulateValue(items[items.length -1].value3 ),value4: simulateValue(items[items.length -1].value4 ), value5: simulateValue(items[items.length -1].value5 )  });
+//				items.push({time: new Date().time, value: simulateValue(items[items.length -1].value ),value1: simulateValue(items[items.length -1].value1 ),value2: simulateValue(items[items.length -1].value2 ), value3: simulateValue(items[items.length -1].value3 ),value4: simulateValue(items[items.length -1].value4 ), value5: simulateValue(items[items.length -1].value5 )  });
+//				items.push({time: new Date().time, value: simulateValue(items[items.length -1].value ),value1: simulateValue(items[items.length -1].value1 ),value2: simulateValue(items[items.length -1].value2 ), value3: simulateValue(items[items.length -1].value3 ),value4: simulateValue(items[items.length -1].value4 ), value5: simulateValue(items[items.length -1].value5 )  });
+				items.shift();
+				drawChart();
+//				createInput.input_1 	= (arc[0])?arc[0]:'0.00';
+//				createInput.input_2 	= (arc[1])?arc[1]:'0.00';
+//				createInput.input_3 	= (arc[2])?arc[2]:'0.00';
+//				createInput.input_4 	= (arc[3])?arc[3]:'0.00';
+//				createInput.input_5 	= (arc[4])?arc[4]:'0.00';
+//				createInput.input_6 	= (arc[5])?arc[5]:'0.00';
+//				createInput.input_7 	= (arc[6])?arc[6]:'0.00';
+//				createInput.input_8 	= (arc[7])?arc[7]:'0.00';
+//				createInput.input_9 	= (arc[8])?arc[8]:'0.00';
+//				createInput.input_10 	= (arc[9])?arc[9]:'0.00';
+//				createInput.input_11 	= (arc[10])?arc[10]:'0.00';
+//				createInput.input_12	= (arc[11])?arc[11]:'0.00';
+//				createInput.input_13 	= (arc[12])?arc[12]:'0.00';
+//				createInput.input_14 	= (arc[13])?arc[13]:'0.00';
+//				createInput.input_15 	= (arc[14])?arc[14]:'0.00';
+			}
+			
 		]]>
 	</fx:Script>
 	<fx:Declarations>
-		
-		<fieldreportinputservice:FieldreportinputService id="fieldinputService"
-														 fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)"
-														 showBusyCursor="true"/>
-		<s:CallResponder id="getField_inputByreportIDResult" result="getField_inputByreportIDResult_resultHandler(event)"/>
-		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
-	
-	
-	
 	<s:BorderContainer left="2" right="2" top="2" bottom="2" borderVisible="false">
 		<s:Label x="10" top="3" height="20" fontSize="11" fontWeight="bold"
-				 text="Line Chart 1" textAlign="left"
+				 text="Line Chart 1 x" textAlign="left"
 				 verticalAlign="middle"/>
 		<mx:HRule left="10" top="25" width="120"/>
 		<s:HGroup left="10" top="35" height="20" fontSize="10" gap="30">
@@ -140,453 +239,52 @@
 		</s:HGroup>
 		
 	</s:BorderContainer>
-	<mx:VBox left="20" right="20" top="70" horizontalAlign="left" height="141" paddingLeft="24" paddingRight="24"
-			 verticalGap="0" verticalScrollPolicy="off">
-		
-		<mx:CartesianChart id="smallChart" 
-						   width="100%" height="100"
-						   dataProvider="{chartData}" 
-						   showDataTips="true" >
-			
-			<mx:horizontalAxis>
-				<mx:CategoryAxis id="hhaxis" categoryField="id"/>
-			</mx:horizontalAxis> 
-			
-			<mx:horizontalAxisRenderers>
-				<mx:AxisRenderer axis="{hhaxis}" visible="false"/>
-			</mx:horizontalAxisRenderers>
-			
-			<mx:verticalAxis>
-				<mx:LinearAxis id="vvaxis" />
-			</mx:verticalAxis>
-			
-			<mx:verticalAxisRenderers>
-				<mx:AxisRenderer axis="{vvaxis}" visible="false"  />
-			</mx:verticalAxisRenderers>
-			
-			<mx:series>
-				<mx:AreaSeries name="data1" yField="input_1" areaStroke="{areaStroke}" areaFill="{areaColor}" />
-				<mx:AreaSeries name="data2" yField="input_2" areaStroke="{areaStroke}" areaFill="{areaColor}" />
-			</mx:series>
-			
-			<mx:annotationElements>
-				<mx:HDividedBox id="overlayCanvas" width="100%" alpha="1" 
-								dividerAffordance="5" liveDragging="true" horizontalGap="10" 
-								verticalGap="0" horizontalScrollPolicy="off" 
-								dividerDrag="updateBoundariesFromDivider(event)" 
-								dividerSkin="{blankDividerClass}"
-								mouseOver="overlayCanvas.setStyle('dividerSkin', dividerClass);" 
-								mouseOut="overlayCanvas.setStyle('dividerSkin', blankDividerClass);"
-								>
-					
-					<mx:Canvas id="leftBox" height="100%" width="{(overlayCanvas.width / chartData.length) * leftBoundary}" 
-							   backgroundAlpha="0.4"  borderColor="#999999" borderStyle="solid" />
-					<mx:Canvas id="visibleBox" width="100%" height="100%" 
-							   buttonMode="true" mouseDown="setMouseDown(smallChart)"/>
-					<mx:Canvas id="rightBox" height="100%" width="{(overlayCanvas.width / chartData.length) * (chartData.length - rightBoundary)}"
-							   backgroundAlpha="0.4"  borderColor="#999999" borderStyle="solid"/>
-				</mx:HDividedBox>
-				
-			</mx:annotationElements>
-		</mx:CartesianChart>
-		<mx:HBox horizontalGap="0" paddingLeft="24" >
-			<flexlib:HSlider id="slider" width="{overlayCanvas.width + 12}"  height="25"
-							 trackHighlightSkin="flexlib.skins.SliderThumbHighlightSkin"
-							 trackSkin="com.icd.fieldlogger.myHome.report.lineChart.EmptySkin"
-							 allowTrackClick="true" allowThumbOverlap="false" 
-							 liveDragging="true" change="updateBoundariesFromSlider()"
-							 showDataTip="true" dataTipPlacement="bottom" dataTipOffset="3"
-							 showTrackHighlight="true"
-							 thumbCount="2" snapInterval="1"
-							 values="{[leftBoundary, rightBoundary]}"
-							 minimum="0" maximum="{chartData.length - 1}"
-							 />
-		</mx:HBox>
-	</mx:VBox>
-	<s:Scroller id="sc" left="20" right="20" top="215" bottom="10" horizontalScrollPolicy="off"
-				verticalScrollPolicy="on">
+	<s:Group id="sc" left="20" right="20" top="66" bottom="10">
 		<s:VGroup   width="100%" height="100%">
-			
-			
-			<mx:CartesianChart dataProvider="{myData}" showDataTips="true" width="100%" height="107" >
-				<mx:horizontalAxis>
-					<mx:CategoryAxis id="a1" categoryField="id"/>
-				</mx:horizontalAxis>
-				<mx:horizontalAxisRenderers>
-					<mx:AxisRenderer axis="{a1}" showLabels="false" >
-						<mx:axisStroke>
-							<mx:Stroke color="#000000" weight=".1" alpha=".75" />
-						</mx:axisStroke>
-						<mx:tickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:tickStroke>
-						<mx:minorTickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:minorTickStroke>
-					</mx:AxisRenderer>
-				</mx:horizontalAxisRenderers>
-				<mx:series>
-					<!--<mx:LineSeries displayName="input1" yField="input_1" xField="id" visible="true" includeInLayout="true"/>-->
-					<mx:AreaSeries displayName="input1" yField="input_1" xField="id" visible="true" includeInLayout="true"/>
-				</mx:series>
-			</mx:CartesianChart>
-			
-			<mx:CartesianChart dataProvider="{myData}" showDataTips="true" width="100%" height="107" >
-				<mx:horizontalAxis>
-					<mx:CategoryAxis id="a2" categoryField="id"/>
-				</mx:horizontalAxis>
-				<mx:horizontalAxisRenderers>
-					<mx:AxisRenderer axis="{a2}" showLabels="false" >
-						<mx:axisStroke>
-							<mx:Stroke color="#000000" weight=".1" alpha=".75" />
-						</mx:axisStroke>
-						<mx:tickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:tickStroke>
-						<mx:minorTickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:minorTickStroke>
-					</mx:AxisRenderer>
-				</mx:horizontalAxisRenderers>
-				<mx:series>
-					<mx:LineSeries displayName="input2" yField="input_2" xField="id" visible="true" includeInLayout="true"/>
-					<mx:AreaSeries displayName="input2" yField="input_2" xField="id" visible="true" includeInLayout="true"/>
-				</mx:series>
-			</mx:CartesianChart>
-			
-			
-			<mx:CartesianChart dataProvider="{myData}" showDataTips="true" width="100%" height="107" >
-				<mx:horizontalAxis>
-					<mx:CategoryAxis id="a3" categoryField="id"/>
-				</mx:horizontalAxis>
-				<mx:horizontalAxisRenderers>
-					<mx:AxisRenderer axis="{a3}" showLabels="false" >
-						<mx:axisStroke>
-							<mx:Stroke color="#000000" weight=".1" alpha=".75" />
-						</mx:axisStroke>
-						<mx:tickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:tickStroke>
-						<mx:minorTickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:minorTickStroke>
-					</mx:AxisRenderer>
-				</mx:horizontalAxisRenderers>
-				<mx:series>
-					<mx:LineSeries displayName="input3" yField="input_3" xField="id" visible="true" includeInLayout="true"/>
-				</mx:series>
-			</mx:CartesianChart>
-			
-			
-			<mx:CartesianChart dataProvider="{myData}" showDataTips="true" width="100%" height="107" >
-				<mx:horizontalAxis>
-					<mx:CategoryAxis id="a4" categoryField="id"/>
-				</mx:horizontalAxis>
-				<mx:horizontalAxisRenderers>
-					<mx:AxisRenderer axis="{a4}" showLabels="false" >
-						<mx:axisStroke>
-							<mx:Stroke color="#000000" weight=".1" alpha=".75" />
-						</mx:axisStroke>
-						<mx:tickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:tickStroke>
-						<mx:minorTickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:minorTickStroke>
-					</mx:AxisRenderer>
-				</mx:horizontalAxisRenderers>
-				<mx:series>
-					<mx:LineSeries displayName="input4" yField="input_4" xField="id" visible="true" includeInLayout="true"/>
-				</mx:series>
-			</mx:CartesianChart>
-			
-			
-			<mx:CartesianChart dataProvider="{myData}" showDataTips="true" width="100%" height="107" >
-				<mx:horizontalAxis>
-					<mx:CategoryAxis id="a5" categoryField="id"/>
-				</mx:horizontalAxis>
-				<mx:horizontalAxisRenderers>
-					<mx:AxisRenderer axis="{a5}" showLabels="false" >
-						<mx:axisStroke>
-							<mx:Stroke color="#000000" weight=".1" alpha=".75" />
-						</mx:axisStroke>
-						<mx:tickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:tickStroke>
-						<mx:minorTickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:minorTickStroke>
-					</mx:AxisRenderer>
-				</mx:horizontalAxisRenderers>
-				<mx:series>
-					<mx:LineSeries displayName="input5" yField="input_5" xField="id" visible="true" includeInLayout="true"/>
-				</mx:series>
-			</mx:CartesianChart>
-			
-			
-			<mx:CartesianChart dataProvider="{myData}" showDataTips="true" width="100%" height="107" >
-				<mx:horizontalAxis>
-					<mx:CategoryAxis id="a6" categoryField="id"/>
-				</mx:horizontalAxis>
-				<mx:horizontalAxisRenderers>
-					<mx:AxisRenderer axis="{a6}" showLabels="false" >
-						<mx:axisStroke>
-							<mx:Stroke color="#000000" weight=".1" alpha=".75" />
-						</mx:axisStroke>
-						<mx:tickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:tickStroke>
-						<mx:minorTickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:minorTickStroke>
-					</mx:AxisRenderer>
-				</mx:horizontalAxisRenderers>
-				<mx:series>
-					<mx:LineSeries displayName="input6" yField="input_6" xField="id" visible="true" includeInLayout="true"/>
-				</mx:series>
-			</mx:CartesianChart>
-			
-			<mx:CartesianChart dataProvider="{myData}" showDataTips="true" width="100%" height="107" >
-				<mx:horizontalAxis>
-					<mx:CategoryAxis id="a7" categoryField="id"/>
-				</mx:horizontalAxis>
-				<mx:horizontalAxisRenderers>
-					<mx:AxisRenderer axis="{a7}" showLabels="false" >
-						<mx:axisStroke>
-							<mx:Stroke color="#000000" weight=".1" alpha=".75" />
-						</mx:axisStroke>
-						<mx:tickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:tickStroke>
-						<mx:minorTickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:minorTickStroke>
-					</mx:AxisRenderer>
-				</mx:horizontalAxisRenderers>
-				<mx:series>
-					<mx:LineSeries displayName="input7" yField="input_7" xField="id" visible="true" includeInLayout="true"/>
-				</mx:series>
-			</mx:CartesianChart>
-			
-			
-			
-			<mx:CartesianChart dataProvider="{myData}" showDataTips="true" width="100%" height="107" >
-				<mx:horizontalAxis>
-					<mx:CategoryAxis id="a8" categoryField="id"/>
-				</mx:horizontalAxis>
-				<mx:horizontalAxisRenderers>
-					<mx:AxisRenderer axis="{a8}" showLabels="false" >
-						<mx:axisStroke>
-							<mx:Stroke color="#000000" weight=".1" alpha=".75" />
-						</mx:axisStroke>
-						<mx:tickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:tickStroke>
-						<mx:minorTickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:minorTickStroke>
-					</mx:AxisRenderer>
-				</mx:horizontalAxisRenderers>
-				<mx:series>
-					<mx:LineSeries displayName="input8" yField="input_8" xField="id" visible="true" includeInLayout="true"/>
-				</mx:series>
-			</mx:CartesianChart>
-			
-			
-			
-			<mx:CartesianChart dataProvider="{myData}" showDataTips="true" width="100%" height="107" >
-				<mx:horizontalAxis>
-					<mx:CategoryAxis id="a9" categoryField="id"/>
-				</mx:horizontalAxis>
-				<mx:horizontalAxisRenderers>
-					<mx:AxisRenderer axis="{a9}" showLabels="false" >
-						<mx:axisStroke>
-							<mx:Stroke color="#000000" weight=".1" alpha=".75" />
-						</mx:axisStroke>
-						<mx:tickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:tickStroke>
-						<mx:minorTickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:minorTickStroke>
-					</mx:AxisRenderer>
-				</mx:horizontalAxisRenderers>
-				<mx:series>
-					<mx:LineSeries displayName="input9" yField="input_9" xField="id" visible="true" includeInLayout="true"/>
-				</mx:series>
-			</mx:CartesianChart>
-			
-			
-			
-			<mx:CartesianChart dataProvider="{myData}" showDataTips="true" width="100%" height="107" >
-				<mx:horizontalAxis>
-					<mx:CategoryAxis id="a10" categoryField="id"/>
-				</mx:horizontalAxis>
-				<mx:horizontalAxisRenderers>
-					<mx:AxisRenderer axis="{a10}" showLabels="false" >
-						<mx:axisStroke>
-							<mx:Stroke color="#000000" weight=".1" alpha=".75" />
-						</mx:axisStroke>
-						<mx:tickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:tickStroke>
-						<mx:minorTickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:minorTickStroke>
-					</mx:AxisRenderer>
-				</mx:horizontalAxisRenderers>
-				<mx:series>
-					<mx:LineSeries displayName="input10" yField="input_10" xField="id" visible="true" includeInLayout="true"/>
-				</mx:series>
-			</mx:CartesianChart>
-			
-			
-			
-			<mx:CartesianChart dataProvider="{myData}" showDataTips="true" width="100%" height="107" >
-				<mx:horizontalAxis>
-					<mx:CategoryAxis id="a11" categoryField="id"/>
-				</mx:horizontalAxis>
-				<mx:horizontalAxisRenderers>
-					<mx:AxisRenderer axis="{a11}" showLabels="false" >
-						<mx:axisStroke>
-							<mx:Stroke color="#000000" weight=".1" alpha=".75" />
-						</mx:axisStroke>
-						<mx:tickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:tickStroke>
-						<mx:minorTickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:minorTickStroke>
-					</mx:AxisRenderer>
-				</mx:horizontalAxisRenderers>
-				<mx:series>
-					<mx:LineSeries displayName="input11" yField="input_11" xField="id" visible="true" includeInLayout="true"/>
-				</mx:series>
-			</mx:CartesianChart>
-			
-			
-			
-			<mx:CartesianChart dataProvider="{myData}" showDataTips="true" width="100%" height="107" >
-				<mx:horizontalAxis>
-					<mx:CategoryAxis id="a12" categoryField="id"/>
-				</mx:horizontalAxis>
-				<mx:horizontalAxisRenderers>
-					<mx:AxisRenderer axis="{a12}" showLabels="false" >
-						<mx:axisStroke>
-							<mx:Stroke color="#000000" weight=".1" alpha=".75" />
-						</mx:axisStroke>
-						<mx:tickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:tickStroke>
-						<mx:minorTickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:minorTickStroke>
-					</mx:AxisRenderer>
-				</mx:horizontalAxisRenderers>
-				<mx:series>
-					<mx:LineSeries displayName="input12" yField="input_12" xField="id" visible="true" includeInLayout="true"/>
-				</mx:series>
-			</mx:CartesianChart>
-			
-			
-			
-			<mx:CartesianChart dataProvider="{myData}" showDataTips="true" width="100%" height="107" >
-				<mx:horizontalAxis>
-					<mx:CategoryAxis id="a13" categoryField="id"/>
-				</mx:horizontalAxis>
-				<mx:horizontalAxisRenderers>
-					<mx:AxisRenderer axis="{a13}" showLabels="false" >
-						<mx:axisStroke>
-							<mx:Stroke color="#000000" weight=".1" alpha=".75" />
-						</mx:axisStroke>
-						<mx:tickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:tickStroke>
-						<mx:minorTickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:minorTickStroke>
-					</mx:AxisRenderer>
-				</mx:horizontalAxisRenderers>
-				<mx:series>
-					<mx:LineSeries displayName="input13" yField="input_13" xField="id" visible="true" includeInLayout="true"/>
-				</mx:series>
-			</mx:CartesianChart>
-			
-			
-			
-			<mx:CartesianChart dataProvider="{myData}" showDataTips="true" width="100%" height="107" >
-				<mx:horizontalAxis>
-					<mx:CategoryAxis id="a14" categoryField="id"/>
-				</mx:horizontalAxis>
-				<mx:horizontalAxisRenderers>
-					<mx:AxisRenderer axis="{a14}" showLabels="false" >
-						<mx:axisStroke>
-							<mx:Stroke color="#000000" weight=".1" alpha=".75" />
-						</mx:axisStroke>
-						<mx:tickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:tickStroke>
-						<mx:minorTickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:minorTickStroke>
-					</mx:AxisRenderer>
-				</mx:horizontalAxisRenderers>
-				<mx:series>
-					<mx:LineSeries displayName="input14" yField="input_14" xField="id" visible="true" includeInLayout="true"/>
-				</mx:series>
-			</mx:CartesianChart>
-			
-			
-			
-			<mx:CartesianChart dataProvider="{myData}" showDataTips="true" width="100%" height="107" >
-				<mx:horizontalAxis>
-					<mx:CategoryAxis id="a15" categoryField="id"/>
-				</mx:horizontalAxis>
-				<mx:horizontalAxisRenderers>
-					<mx:AxisRenderer axis="{a15}" showLabels="false" >
-						<mx:axisStroke>
-							<mx:Stroke color="#000000" weight=".1" alpha=".75" />
-						</mx:axisStroke>
-						<mx:tickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:tickStroke>
-						<mx:minorTickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:minorTickStroke>
-					</mx:AxisRenderer>
-				</mx:horizontalAxisRenderers>
-				<mx:series>
-					<mx:LineSeries displayName="input15" yField="input_15" xField="id" visible="true" includeInLayout="true"/>
-				</mx:series>
-			</mx:CartesianChart>
-			
-			
-			
-			<mx:CartesianChart dataProvider="{myData}" showDataTips="true" width="100%" height="107" >
-				<mx:horizontalAxis>
-					<mx:CategoryAxis id="a16" categoryField="id"/>
-				</mx:horizontalAxis>
-				<mx:horizontalAxisRenderers>
-					<mx:AxisRenderer axis="{a16}" showLabels="true" >
-						<mx:axisStroke>
-							<mx:Stroke color="#000000" weight=".1" alpha=".75" />
-						</mx:axisStroke>
-						<mx:tickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:tickStroke>
-						<mx:minorTickStroke>
-							<mx:Stroke color="#CCCCCC" weight="0.1" />
-						</mx:minorTickStroke>
-					</mx:AxisRenderer>
-				</mx:horizontalAxisRenderers>
-				<mx:series>
-					<mx:LineSeries displayName="input16" yField="input_16" xField="id" visible="true" includeInLayout="true"/>
-				</mx:series>
-			</mx:CartesianChart>
-			
-			
+			<s:SkinnableContainer id="chart" backgroundColor="#505050" width="100%" height="100%" >
+				<s:Path id="path">
+					<s:stroke>  
+						<s:SolidColorStroke weight="1" color="#FFFFFF" />  
+					</s:stroke>  
+				</s:Path>  
+			</s:SkinnableContainer>
+			<s:SkinnableContainer id="chart1" backgroundColor="#505050"  width="100%" height="100%" >
+				<s:Path id="path1">
+					<s:stroke>  
+						<s:SolidColorStroke weight="1" color="#FFFFFF" />  
+					</s:stroke>  
+				</s:Path>  
+			</s:SkinnableContainer>
+			<s:SkinnableContainer id="chart2" backgroundColor="#505050"  width="100%" height="100%" >
+				<s:Path id="path2">
+					<s:stroke>  
+						<s:SolidColorStroke weight="1" color="#FFFFFF" />  
+					</s:stroke>  
+				</s:Path>  
+			</s:SkinnableContainer>
+			<s:SkinnableContainer id="chart3" backgroundColor="#505050"  width="100%" height="100%" >
+				<s:Path id="path3">
+					<s:stroke>  
+						<s:SolidColorStroke weight="1" color="#FFFFFF" />  
+					</s:stroke>  
+				</s:Path>  
+			</s:SkinnableContainer>
+			<s:SkinnableContainer id="chart4" backgroundColor="#505050"  width="100%" height="100%" >
+				<s:Path id="path4">
+					<s:stroke>  
+						<s:SolidColorStroke weight="1" color="#FFFFFF" />  
+					</s:stroke>  
+				</s:Path>  
+			</s:SkinnableContainer>
+			<s:SkinnableContainer id="chart5" backgroundColor="#505050"  width="100%" height="100%" >
+				<s:Path id="path5">
+					<s:stroke>  
+						<s:SolidColorStroke weight="1" color="#FFFFFF" />  
+					</s:stroke>  
+				</s:Path>  
+			</s:SkinnableContainer>
 		</s:VGroup>
-	</s:Scroller>
+	</s:Group>
 	
 	
 </s:Module>

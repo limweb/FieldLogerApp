@@ -238,7 +238,8 @@
 			</mx:annotationElements>
 			
 		</mx:CartesianChart>
-		<mx:HBox horizontalGap="0" paddingLeft="24">
+		<mx:HBox width="162" horizontalGap="0" paddingLeft="24">
+			<s:Label text="test"/>
 			<flexlib:HSlider id="slider" width="{overlayCanvas.width + 12}"  height="25"
 							 trackHighlightSkin="flexlib.skins.SliderThumbHighlightSkin"
 							 
